@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sample Tax Check</title>
+<style>
+:root{
+  --bg:#ffffff; --card:#f4f6f9; --ink:#1a2233; --muted:#5a6476; --line:#dde3ec;
+  --headerbg:#001740; --heading:#001740; --blue:#005493; --onblue:#ffffff;
+  --gold:#f5ac03; --ok:#1d6b43; --okbg:#e6f3eb; --warn:#8a5a00; --warnbg:#fff3d6; --stop:#a8231b; --stopbg:#fce6e4;
+  --chip:#e3edf7; --focus:#005493; --inputbg:#ffffff;
+  color-scheme: light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1422; --card:#172131; --ink:#e6ebf3; --muted:#a2adc0; --line:#2a3548;
+    --headerbg:#071a3a; --heading:#cfe0f5; --blue:#4c9be0; --onblue:#06121f;
+    --gold:#f5ac03; --ok:#7fd3a3; --okbg:#143023; --warn:#f3c463; --warnbg:#33280d; --stop:#f19a92; --stopbg:#3a1714;
+    --chip:#1d2b40; --focus:#7db8ee; --inputbg:#0f1828; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1422; --card:#172131; --ink:#e6ebf3; --muted:#a2adc0; --line:#2a3548;
+  --headerbg:#071a3a; --heading:#cfe0f5; --blue:#4c9be0; --onblue:#06121f;
+  --gold:#f5ac03; --ok:#7fd3a3; --okbg:#143023; --warn:#f3c463; --warnbg:#33280d; --stop:#f19a92; --stopbg:#3a1714;
+  --chip:#1d2b40; --focus:#7db8ee; --inputbg:#0f1828; color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Calibri,Carlito,"Segoe UI",Roboto,Arial,sans-serif;font-size:17px;line-height:1.5}
+header.top{background:var(--headerbg);color:#fff;padding:20px 20px 18px}
+header.top .wrap{max-width:800px;margin:0 auto;display:flex;gap:16px;align-items:flex-start;justify-content:space-between}
+header.top h1{font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:1.35rem;margin:0 0 4px;font-weight:700}
+header.top p{margin:0;opacity:.85;font-size:.98rem;max-width:560px}
+.lang{display:flex;border:1.5px solid rgba(255,255,255,.5);border-radius:8px;overflow:hidden;flex-shrink:0}
+.lang button{background:transparent;color:#fff;border:0;font:inherit;font-weight:700;padding:6px 12px;cursor:pointer}
+.lang button.on{background:#fff;color:#001740}
+main{max-width:800px;margin:0 auto;padding:20px 16px 48px}
+.progress{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:2px 0 18px}
+.progress span{display:block;height:100%;background:var(--blue);width:0;transition:width .25s ease}
+.side{font-size:.92rem;color:var(--blue);font-weight:700;margin:0 0 6px}
+.qcard{background:var(--card);border-radius:10px;padding:22px 20px}
+.qcard h2{font-family:Arial,Helvetica,sans-serif;color:var(--heading);font-size:1.22rem;line-height:1.3;margin:0 0 10px;font-weight:700}
+.help{color:var(--muted);font-size:.95rem;margin:0 0 16px}
+.opts{display:grid;gap:10px}
+.opt{display:block;width:100%;text-align:left;background:var(--bg);color:var(--ink);border:1.5px solid var(--line);border-radius:8px;padding:12px 15px;font:inherit;cursor:pointer}
+.opt:hover{border-color:var(--blue)}
+.opt:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.lang button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.opt strong{display:block;font-weight:700}
+.opt span{display:block;color:var(--muted);font-size:.93rem;margin-top:2px}
+.opt.sel{border-color:var(--blue);background:var(--chip)}
+.numrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.numrow label{display:flex;align-items:center;gap:8px;background:var(--inputbg);border:1.5px solid var(--line);border-radius:8px;padding:0 12px}
+.numrow input{border:0;background:transparent;color:var(--ink);font:inherit;font-size:1.15rem;padding:11px 0;width:160px}
+.numrow input:focus{outline:none}
+.err{color:var(--stop);font-size:.93rem;margin-top:8px;min-height:1.2em}
+.nav{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;border-radius:8px;padding:10px 16px;cursor:pointer;border:1.5px solid var(--blue);background:var(--blue);color:var(--onblue);font-weight:700}
+.btn.ghost{background:transparent;color:var(--blue)}
+.btn.small{padding:5px 10px;font-size:.88rem}
+.btn[disabled]{opacity:.4;cursor:default}
+.verdicts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 18px}
+.vt{background:var(--card);border-radius:10px;padding:14px;border-top:4px solid var(--blue)}
+.vt.gold{border-top-color:var(--gold)}
+.vt small{display:block;color:var(--muted);font-size:.88rem}
+.vt b{display:block;font-family:Arial,Helvetica,sans-serif;font-size:1.04rem;color:var(--heading);margin-top:3px;line-height:1.3}
+.alert{border-radius:8px;padding:12px 14px;margin:0 0 10px;font-size:.98rem}
+.alert.stop{background:var(--stopbg);color:var(--stop)}
+.alert.warn{background:var(--warnbg);color:var(--warn)}
+.alert.info{background:var(--chip);color:var(--ink)}
+.alert b{display:block}
+section.block{background:var(--card);border-radius:10px;padding:18px 18px 14px;margin:0 0 14px}
+section.block h3{font-family:Arial,Helvetica,sans-serif;color:var(--heading);font-size:1.08rem;margin:0 0 10px;text-transform:uppercase;letter-spacing:.03em}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.fact{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:.93rem}
+.fact i{font-style:normal;color:var(--muted)}
+.todo{margin:0 0 10px;padding:0;list-style:none}
+.todo li{position:relative;padding-left:20px;margin:0 0 7px}
+.todo li::before{content:"";position:absolute;left:3px;top:.55em;width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.inv{background:var(--bg);border-left:4px solid var(--blue);border-radius:4px;padding:10px 12px;font-size:.95rem;margin:4px 0 12px}
+.inv small{display:block;color:var(--muted);font-size:.85rem;margin-bottom:2px}
+.euro{background:var(--bg);border-left:4px solid var(--gold);border-radius:4px;padding:10px 12px;font-size:.95rem;margin:0 0 10px}
+.euro b{color:var(--heading)}
+details{margin-top:6px}
+summary{cursor:pointer;color:var(--blue);font-weight:700;font-size:.95rem}
+details ul{margin:8px 0 2px;padding-left:20px;font-size:.92rem;color:var(--muted)}
+details li{margin-bottom:4px}
+.tbl-wrap{overflow-x:auto}
+table.econ{border-collapse:collapse;width:100%;font-size:.97rem;margin:0 0 12px}
+table.econ td{padding:5px 8px;vertical-align:top}
+table.econ td:last-child{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+table.econ tr.total td{font-weight:700;border-top:1.5px solid var(--ink)}
+table.econ tr.hl td{background:var(--chip)}
+table.econ tr.sub td{color:var(--muted);font-size:.9rem}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.party{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:.95rem}
+.party b{display:block;color:var(--heading);margin-bottom:4px;font-family:Arial,Helvetica,sans-serif}
+.tpl{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:0 0 10px}
+.tpl-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.tpl-h b{color:var(--heading)}
+.tpl pre{white-space:pre-wrap;font-family:inherit;font-size:.93rem;margin:0;color:var(--ink)}
+.answers{font-size:.93rem;margin:0;padding:0;list-style:none}
+.answers li{display:grid;grid-template-columns:1fr auto;gap:12px;padding:6px 0;border-bottom:1px solid var(--line)}
+.answers li span:last-child{font-weight:700;text-align:right}
+.foot{color:var(--muted);font-size:.88rem;margin-top:18px}
+.docgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.docgrid label{display:flex;flex-direction:column;gap:3px;font-size:.9rem;color:var(--muted)}
+.docgrid input{font:inherit;color:var(--ink);background:var(--inputbg);border:1.5px solid var(--line);border-radius:6px;padding:7px 9px}
+section.final{border:2px solid var(--headerbg);border-radius:10px;margin:0 0 14px;overflow:hidden}
+section.final h3{margin:0;background:var(--headerbg);color:#fff;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:1.15rem;padding:12px 18px}
+.tg{padding:12px 18px 4px}
+.tg+.tg{border-top:1px solid var(--line)}
+.tgh{margin:0 0 6px;font-weight:700;color:var(--blue)}
+.tg.stop .tgh{color:var(--stop)}
+.tg ul{list-style:none;margin:0;padding:0}
+.tg li{margin:0 0 9px}
+.tg label{display:grid;grid-template-columns:auto auto 1fr;gap:10px;align-items:start;cursor:pointer;font-size:1.02rem}
+.tg input{width:18px;height:18px;margin-top:3px;accent-color:var(--blue)}
+.tg .n{font-weight:700;color:var(--muted);min-width:1.4em;text-align:right}
+.tg input:checked ~ span:last-child{text-decoration:line-through;color:var(--muted)}
+@media (max-width:620px){.docgrid{grid-template-columns:1fr}}
+.copied{color:var(--ok);font-weight:700;font-size:.93rem}
+@media (max-width:620px){ .verdicts,.cols{grid-template-columns:1fr} body{font-size:16px} header.top .wrap{flex-direction:column} }
+@media (prefers-reduced-motion:reduce){.progress span{transition:none}}
+@media print{.nav,.progress,.lang{display:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div><h1 id="h1"></h1><p id="sub"></p></div>
+  <div class="lang" role="group" aria-label="Language"><button data-l="en">EN</button><button data-l="de">DE</button></div>
+</div></header>
+<main>
+  <div class="progress" aria-hidden="true"><span id="bar"></span></div>
+  <div id="app"></div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(function(){
+/* ---------- settings & language ---------- */
+let LANG='en'; const SET={tax:30, base:'ontop'};
+try{ const l=localStorage.getItem('sic_lang'); if(l==='de'||l==='en') LANG=l; }catch(e){}
+const save=()=>{ try{ localStorage.setItem('sic_lang',LANG); }catch(e){} };
+const L=(en,de)=>LANG==='de'?de:en;
+const t=x=>Array.isArray(x)?x[LANG==='de'?1:0]:x;
+const num=v=>{ const x=parseFloat(String(v).replace(/\s/g,'').replace(',','.')); return isNaN(x)?0:x; };
+let CUR='EUR';
+const fmt=n=>new Intl.NumberFormat(LANG==='de'?'de-DE':(CUR==='GBP'?'en-GB':'en-IE'),{style:'currency',currency:CUR}).format(Math.round(n*100)/100);
+
+/* ---------- questions ---------- */
+const DE_=a=>a.entity==='de', UK_=a=>a.entity==='uk', OK_=a=>DE_(a)||UK_(a);
+const EXT=['creator','media','agency'];
+const ext=a=>EXT.includes(a.rtype);
+const brandQ=a=>OK_(a)&&!!a.rtype&&a.rtype!=='ic';
+const pays=a=>a.who==='invoice'||a.who==='credit';
+const svc=a=>a.who==='invoice'||(a.who==='credit'&&a.cnType!=='discount');
+const extGo=a=>OK_(a)&&ext(a)&&!(UK_(a)&&a.rloc==='nonuk')&&!!a.rloc;
+const locOpts=a=>UK_(a)
+  ? [{v:'home',l:['United Kingdom','Vereinigtes Königreich']},{v:'nonuk',l:['Outside the UK','Außerhalb UK']}]
+  : [{v:'home',l:['Germany','Deutschland']},{v:'eu',l:['Another EU country','Anderes EU-Land'],d:['e.g. Austria, Netherlands, France, Poland','z. B. Österreich, Niederlande, Frankreich, Polen']},{v:'noneu',l:['Outside the EU','Außerhalb der EU'],d:['e.g. Switzerland, UK, USA, Taiwan, China','z. B. Schweiz, UK, USA, Taiwan, China']}];
+const YN=[{v:'yes',l:['Yes','Ja']},{v:'no',l:['No','Nein']}];
+
+const Q=[
+ {id:'entity',side:['General','Allgemein'],text:['Which PGG company ships the sample?','Welche PGG-Gesellschaft versendet das Sample?'],
+  help:['VAT rules differ by country.','Die Umsatzsteuerregeln sind je Land unterschiedlich.'],
+  opts:[{v:'de',l:['A German company','Eine deutsche Gesellschaft'],d:['e.g. Caseking','z. B. Caseking']},
+        {v:'uk',l:['A UK company','Eine UK-Gesellschaft'],d:['UK rules','UK-Regeln']},
+        {v:'other',l:['Another company','Eine andere Gesellschaft'],d:['e.g. Jimm’s, PCCG, CK Iberia, CK Hungary, PGW','z. B. Jimm’s, PCCG, CK Iberia, CK Hungary, PGW']}]},
+ {id:'value',side:['General','Allgemein'],type:'num',show:OK_,text:['What is the product worth?','Was ist das Produkt wert?'],
+  help:['Our net purchase price (excl. VAT) from the ERP – not 0.01 and not the retail price.','Unser Netto-Einkaufspreis (ohne USt) aus dem ERP – nicht 0,01 und nicht der Verkaufspreis.']},
+ {id:'rtype',side:['General','Allgemein'],show:OK_,text:['Who receives the product?','Wer erhält das Produkt?'],
+  opts:[{v:'creator',l:['Influencer, streamer or content creator','Influencer, Streamer oder Content Creator']},
+        {v:'media',l:['Media outlet or tech site','Medium oder Tech-Portal'],d:['A company, e.g. magazine or channel run as a business','Ein Unternehmen, z. B. Magazin oder gewerblicher Kanal']},
+        {v:'agency',l:['Agency or management','Agentur oder Management'],d:['We deal with the agency; the product goes to their creator','Vertragspartner ist die Agentur; das Produkt geht an ihren Creator']},
+        {v:'consumer',l:['End customers','Endkunden'],d:['Giveaway, raffle or event prize','Gewinnspiel, Verlosung oder Event-Preis']},
+        {v:'own',l:['We use it ourselves','Eigene Nutzung'],d:['Demo, display, event booth, testing or system integration','Demo, Ausstellung, Messestand, Test oder Systemintegration']},
+        {v:'staff',l:['An employee','Ein Mitarbeiter'],d:['Keeps it or uses it privately','Behält es oder nutzt es privat']},
+        {v:'ic',l:['Another PGG company','Eine andere PGG-Gesellschaft'],d:['Intercompany sample exchange','Intercompany-Sample-Austausch']}]},
+
+ {id:'who',side:['Brand side','Brand-Seite'],show:brandQ,text:['Who pays for this sample?','Wer bezahlt dieses Sample?'],
+  opts:[{v:'invoice',l:['The brand pays – we invoice the brand','Die Brand zahlt – wir stellen eine Rechnung']},
+        {v:'credit',l:['The brand pays – via credit note or deduction','Die Brand zahlt – per Gutschrift oder Verrechnung'],d:['The brand issues a credit note or deducts it from what we owe','Die Brand stellt eine Gutschrift aus oder verrechnet mit unseren Verbindlichkeiten']},
+        {v:'free',l:['The brand gave us the product for free','Die Brand hat das Produkt kostenlos gestellt'],d:['Free sample stock','Kostenloser Sample-Bestand']},
+        {v:'pgg',l:['PGG pays from its own budget','PGG zahlt aus eigenem Budget'],d:['Product from our regular stock, nobody reimburses us','Ware aus unserem Bestand, niemand erstattet sie']}]},
+ {id:'confirm',side:['Brand side','Brand-Seite'],show:a=>brandQ(a)&&pays(a),text:['Do we have the brand’s written confirmation before shipping?','Liegt die schriftliche Bestätigung der Brand vor dem Versand vor?'],
+  help:['A PO, an email or a framework agreement with a seeding budget.','Eine PO, E-Mail oder Rahmenvereinbarung mit Seeding-Budget.'],
+  opts:[{v:'yes',l:['Yes','Ja'],d:['PO, email or framework agreement','PO, E-Mail oder Rahmenvereinbarung']},
+        {v:'adhoc',l:['Not yet – it has to ship now (ad-hoc)','Noch nicht – muss sofort raus (ad-hoc)'],d:['e.g. launch date or review embargo','z. B. Launch-Termin oder Review-Embargo']},
+        {v:'no',l:['No – it can wait','Nein – es kann warten']}]},
+ {id:'fee',side:['Brand side','Brand-Seite'],type:'num',show:a=>brandQ(a)&&pays(a),text:['How much does the brand pay us for this sample?','Wie viel zahlt die Brand uns für dieses Sample?'],
+  help:['Net amount. If the brand covers only part of the value, enter that part.','Nettobetrag. Wenn die Brand nur einen Teil übernimmt, diesen Teil eingeben.']},
+ {id:'cnType',side:['Brand side','Brand-Seite'],show:a=>brandQ(a)&&a.who==='credit',text:['What is the credit note for?','Wofür ist die Gutschrift?'],
+  opts:[{v:'service',l:['Our marketing / seeding work','Unsere Marketing-/Seeding-Leistung'],d:['It pays us for sending products to media on the brand’s behalf','Sie vergütet, dass wir im Auftrag der Brand Produkte an Medien senden']},
+        {v:'discount',l:['A discount on our purchases','Ein Nachlass auf unsere Einkäufe'],d:['e.g. marketing allowance or price reduction on goods we bought','z. B. Werbekostenzuschuss oder Preisnachlass auf gekaufte Ware']},
+        {v:'unclear',l:['Not clear','Unklar']}]},
+ {id:'brandloc',side:['Brand side','Brand-Seite'],show:a=>brandQ(a)&&pays(a),text:['Where is the brand company based?','Wo sitzt die Brand-Gesellschaft?'],
+  help:['The company on our invoice or on the credit note – check the address on the document.','Die Gesellschaft auf unserer Rechnung bzw. der Gutschrift – Adresse auf dem Dokument prüfen.'],opts:locOpts},
+ {id:'vatid',side:['Brand side','Brand-Seite'],show:a=>brandQ(a)&&DE_(a)&&svc(a)&&a.brandloc==='eu',text:['Has the brand given us a valid EU VAT number, and has it been checked?','Hat die Brand eine gültige EU-USt-IdNr. angegeben, und wurde sie geprüft?'],
+  help:['Finance checks VAT numbers via the EU VIES service.','Finance prüft USt-IdNrn. über das EU-VIES-System.'],opts:YN},
+ {id:'proof',side:['Brand side','Brand-Seite'],show:a=>brandQ(a)&&DE_(a)&&svc(a)&&a.brandloc==='noneu',text:['Do we have proof that the brand is a company?','Haben wir einen Nachweis, dass die Brand ein Unternehmen ist?'],
+  help:['e.g. business registration or tax certificate – usually once per brand.','z. B. Handelsregisterauszug oder Steuerbescheinigung – meist einmal pro Brand.'],opts:YN},
+ {id:'origin',side:['Brand side','Brand-Seite'],show:a=>brandQ(a)&&a.who==='free',text:['Where was the free product shipped to us from?','Von wo wurde das kostenlose Produkt an uns versendet?'],
+  opts:a=>UK_(a)?[{v:'home',l:['Within the UK','Innerhalb UK']},{v:'noneu',l:['From outside the UK','Von außerhalb UK'],d:['Goes through customs','Geht durch den Zoll']}]
+                :[{v:'home',l:['Germany','Deutschland']},{v:'eu',l:['Another EU country','Anderes EU-Land']},{v:'noneu',l:['Outside the EU','Außerhalb der EU'],d:['e.g. China or Taiwan – goes through customs','z. B. China oder Taiwan – geht durch den Zoll']}]},
+
+ {id:'rloc',side:['Recipient side','Empfänger-Seite'],show:a=>OK_(a)&&ext(a),text:a=>a.rtype==='agency'?['Where is the agency based?','Wo sitzt die Agentur?']:['Where is the recipient based?','Wo sitzt der Empfänger?'],opts:locOpts},
+ {id:'paid',side:['Recipient side','Empfänger-Seite'],show:extGo,text:['Do we also pay a fee?','Zahlen wir zusätzlich ein Honorar?'],help:['A paid media deal.','Ein bezahlter Media-Deal.'],opts:YN},
+ {id:'ret',side:['Recipient side','Empfänger-Seite'],show:a=>extGo(a)&&!!a.paid,text:['Will the product come back?','Kommt das Produkt zurück?'],
+  opts:[{v:'yes',l:['Yes – it’s a loan with a return date','Ja – Leihe mit Rückgabedatum']},{v:'no',l:['No – they keep it','Nein – sie behalten es']}]},
+ {id:'counter',side:['Recipient side','Empfänger-Seite'],show:a=>extGo(a)&&a.paid==='no'&&a.ret==='no',text:['Has the recipient agreed in advance to do something for us in return?','Hat der Empfänger vorab eine Gegenleistung zugesagt?'],
+  help:['Only counts if agreed before shipping, ideally in writing.','Zählt nur, wenn vor dem Versand vereinbart, idealerweise schriftlich.'],
+  opts:[{v:'yes',l:['Yes','Ja'],d:['e.g. video, posts, review, stream or mention','z. B. Video, Posts, Review, Stream oder Erwähnung']},{v:'no',l:['No – it’s a gift','Nein – es ist ein Geschenk']}]},
+ {id:'rvat',side:['Recipient side','Empfänger-Seite'],show:a=>extGo(a)&&a.rloc==='home'&&a.ret==='no'&&(a.paid==='yes'||a.counter==='yes'),
+  text:['Does the recipient charge VAT on their invoices?','Weist der Empfänger auf seinen Rechnungen USt aus?'],
+  help:['Ask them. Small businesses and private persons don’t.','Nachfragen. Kleinunternehmer und Privatpersonen tun das nicht.'],
+  opts:[{v:'yes',l:['Yes, VAT-registered','Ja, umsatzsteuerlich registriert']},{v:'no',l:['No – small business or private person','Nein – Kleinunternehmer oder Privatperson']},{v:'unknown',l:['I don’t know','Weiß ich nicht']}]},
+ {id:'rvatid',side:['Recipient side','Empfänger-Seite'],show:a=>extGo(a)&&DE_(a)&&a.rloc==='eu'&&a.ret==='no'&&(a.paid==='yes'||a.counter==='yes'),
+  text:['Does the recipient have a valid EU VAT number?','Hat der Empfänger eine gültige EU-USt-IdNr.?'],opts:YN},
+ {id:'others',side:['Recipient side','Empfänger-Seite'],type:'num',zero:true,show:a=>extGo(a)&&a.paid==='no'&&a.ret==='no'&&a.counter==='no',
+  text:['What have we already given this person as gifts this year?','Was hat diese Person dieses Jahr bereits als Geschenk erhalten?'],
+  help:['Net value of other gifts this calendar year (UK: last 12 months). Enter 0 if none.','Nettowert anderer Geschenke im Kalenderjahr (UK: letzte 12 Monate). 0, wenn keine.']},
+ {id:'cloc',side:['Recipient side','Empfänger-Seite'],show:a=>OK_(a)&&a.rtype==='consumer',text:['Where does the prize go?','Wohin geht der Preis?'],opts:locOpts},
+ {id:'okind',side:['Recipient side','Empfänger-Seite'],show:a=>OK_(a)&&a.rtype==='own',text:['How do we use it?','Wie nutzen wir es?'],
+  opts:[{v:'demo',l:['Demo, display, test or event unit','Demo-, Ausstellungs-, Test- oder Messegerät'],d:['Stays ours','Bleibt in unserem Eigentum']},
+        {v:'build',l:['Built into a system we sell','In ein verkauftes System verbaut']},
+        {v:'used',l:['Used up or destroyed in testing','Im Test verbraucht oder zerstört']}]},
+ {id:'skind',side:['Recipient side','Empfänger-Seite'],show:a=>OK_(a)&&a.rtype==='staff',text:['What does the employee do with it?','Was macht der Mitarbeiter damit?'],
+  opts:[{v:'keep',l:['Keeps it','Behält es']},{v:'use',l:['Uses it privately for a while and returns it','Nutzt es privat und gibt es zurück']}]},
+ {id:'icdest',side:['Intercompany','Intercompany'],show:a=>OK_(a)&&a.rtype==='ic',text:['Where is the receiving PGG company?','Wo sitzt die empfangende PGG-Gesellschaft?'],
+  opts:a=>UK_(a)?[{v:'eu',l:['EU','EU'],d:['e.g. Caseking, Jimm’s, CK Iberia','z. B. Caseking, Jimm’s, CK Iberia']},{v:'noneu',l:['Rest of the world','Übrige Welt'],d:['e.g. PCCG, PGW USA','z. B. PCCG, PGW USA']}]
+                :[{v:'de',l:['Germany','Deutschland']},{v:'eu',l:['Another EU country','Anderes EU-Land'],d:['e.g. Jimm’s, CK Iberia, CK Hungary','z. B. Jimm’s, CK Iberia, CK Hungary']},
+                  {v:'noneu',l:['Outside the EU','Außerhalb der EU'],d:['e.g. UK company, PCCG, PGW USA, PGG China','z. B. UK-Gesellschaft, PCCG, PGW USA, PGG China']}]},
+ {id:'icret',side:['Intercompany','Intercompany'],show:a=>OK_(a)&&a.rtype==='ic',text:['Does the product come back?','Kommt das Produkt zurück?'],
+  opts:[{v:'yes',l:['Yes – temporary loan','Ja – vorübergehende Leihe']},{v:'no',l:['No – it stays there','Nein – es bleibt dort']}]},
+ {id:'organ',side:['Intercompany','Intercompany'],show:a=>DE_(a)&&a.rtype==='ic'&&a.icdest==='de'&&a.icret==='no',text:['Are both companies in the same VAT group (Organschaft)?','Sind beide Gesellschaften in derselben umsatzsteuerlichen Organschaft?'],
+  opts:[{v:'yes',l:['Yes','Ja']},{v:'no',l:['No','Nein']},{v:'unknown',l:['I don’t know','Weiß ich nicht']}]}
+];
+
+/* ---------- flow ---------- */
+const S={a:{},i:0,hist:[],done:false};
+const app=document.getElementById('app'), bar=document.getElementById('bar');
+const vis=q=>!q.show||q.show(S.a);
+const nextIdx=f=>{ for(let k=f+1;k<Q.length;k++) if(vis(Q[k])) return k; return -1; };
+const qText=q=>t(typeof q.text==='function'?q.text(S.a):q.text);
+const qOpts=q=>typeof q.opts==='function'?q.opts(S.a):q.opts;
+
+function header(){
+  document.getElementById('h1').textContent=L('Sample tax check','Sample-Steuercheck');
+  document.getElementById('sub').textContent=L('Answer a few questions about a sample. You’ll see whether to invoice, with or without VAT, and what it costs each side.','Beantworte ein paar Fragen zum Sample. Du siehst, ob mit oder ohne USt fakturiert wird und was es jede Seite kostet.');
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===LANG));
+}
+document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{ LANG=b.dataset.l; save(); render(); });
+
+function render(){
+  header();
+  CUR=S.a.entity==='uk'?'GBP':'EUR';
+  if(S.done){ renderResult(); return; }
+  const q=Q[S.i];
+  const remaining=Q.slice(S.i).filter(vis).length;
+  bar.style.width=Math.min(95,Math.round(S.hist.length/(S.hist.length+remaining)*100))+'%';
+  let h=`<div class="qcard"><p class="side">${t(q.side)}</p><h2>${qText(q)}</h2>${q.help?`<p class="help">${t(q.help)}</p>`:''}`;
+  if(q.type==='num'){
+    let d=S.a[q.id]; if(d===undefined&&q.id==='fee') d=S.a.value; if(d===undefined&&q.zero) d=0;
+    h+=`<div class="numrow"><label><span aria-hidden="true">${CUR}</span><input id="numin" inputmode="decimal" aria-label="${qText(q)}" value="${d!==undefined?d:''}" placeholder="0"></label>
+        <button class="btn" id="numok">${L('Continue','Weiter')}</button></div><div class="err" id="err"></div>`;
+  } else {
+    h+=`<div class="opts">`+qOpts(q).map(o=>`<button class="opt${S.a[q.id]===o.v?' sel':''}" data-v="${o.v}"><strong>${t(o.l)}</strong>${o.d?`<span>${t(o.d)}</span>`:''}</button>`).join('')+`</div>`;
+  }
+  h+=`</div><div class="nav"><button class="btn ghost" id="back" ${S.hist.length?'':'disabled'}>${L('Back','Zurück')}</button>${S.hist.length?`<button class="btn ghost" id="restart">${L('Start over','Neu starten')}</button>`:''}</div>`;
+  app.innerHTML=h;
+  if(q.type==='num'){
+    const inp=document.getElementById('numin'); inp.focus();
+    const go=()=>{ const v=num(inp.value); const ok=v>0||(q.zero&&inp.value.trim()!==''&&v===0);
+      if(!ok){ document.getElementById('err').textContent=q.zero?L('Enter an amount (0 if none).','Betrag eingeben (0, wenn keiner).'):L('Enter an amount greater than 0.','Betrag größer 0 eingeben.'); return; }
+      answer(q,v); };
+    document.getElementById('numok').onclick=go; inp.addEventListener('keydown',e=>{ if(e.key==='Enter') go(); });
+  } else app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(q,b.dataset.v));
+  const bk=document.getElementById('back'); if(bk) bk.onclick=goBack;
+  const rs=document.getElementById('restart'); if(rs) rs.onclick=restart;
+}
+function answer(q,v){
+  const idx=Q.indexOf(q); Q.slice(idx+1).forEach(x=>delete S.a[x.id]);
+  S.a[q.id]=v; S.hist.push(idx);
+  const n=nextIdx(idx); if(n<0) S.done=true; else S.i=n;
+  render(); window.scrollTo(0,0);
+}
+function goBack(){ if(!S.hist.length) return; S.done=false; S.i=S.hist.pop(); render(); }
+function restart(){ S.a={}; S.doc={}; S.i=0; S.hist=[]; S.done=false; render(); window.scrollTo(0,0); }
+
+/* ---------- decision logic ---------- */
+function compute(a){
+  const uk=a.entity==='uk', V=num(a.value), rate=uk?0.20:0.19, rp=uk?'20%':'19%', TAX=num(SET.tax)/100;
+  const vatOn=x=>SET.base==='incl'?x*rate/(1+rate):x*rate;
+  const R={alerts:[],blocks:[],tpl:[],v:{},econ:{}};
+  const free=a.who==='free', freeNoInput=free&&a.origin!=='noneu';
+  const F=pays(a)?num(a.fee):0;
+  const add=(type,h,b)=>R.alerts.push({t:type,h,b});
+  const tpl=(title,text)=>{ if(!R.tpl.find(x=>x.title===title)) R.tpl.push({title,text}); };
+  const EURO_NO=L('<b>No.</b> ','<b>Nein.</b> ');
+
+  /* templates (English – business documents) */
+  const T={
+    confirm:`Subject: Seeding confirmation – [Brand] – [Campaign]\n\nHi [Name],\n\nplease confirm that [Brand] will pay us ${fmt(F)} (net) per sample for sending the following products to media on your behalf:\n- SKU / quantity: [ ]\n- Recipients / campaign: [ ]\n- Billing: our invoice for “seeding / product placement service”\n- Your company name, address and VAT number for the invoice: [ ]\n\nWe will ship once we have your confirmation.\n\nBest regards`,
+    creditSvc:`Please issue the credit note as a self-billed invoice for our service:\n- Title: “Gutschrift / Self-billing invoice”\n- Description: “Seeding / product placement service – campaign [ ]”\n- Amount: ${fmt(F)} net per sample\n- VAT: according to the place-of-supply rules (no German VAT for non-EU brands, reverse charge for EU brands, 19% for German companies)\n- Our full company name, address and VAT number`,
+    creditDisc:`Please reference on the credit note:\n- “Price reduction / marketing allowance on purchases”\n- Campaign / samples: [ ]\n- Related invoice numbers (if any)\n- VAT amount, where the original purchase carried VAT`,
+    proforma:`Proforma invoice – no commercial value\nProduct: [ ] / SKU: [ ] / quantity: [ ]\nValue for customs purposes: ${fmt(V)} per unit\nReason: free sample – no payment`,
+    barter:`Barter agreement – minimum content\n- Parties: PGG company and [recipient / agency], incl. address and VAT number (if any)\n- Product(s) and value: ${fmt(V)} (net)\n- Deliverables: e.g. 1 video, 2 posts, by [date]\n- Consideration: the product is given in exchange for the deliverables${a.paid==='yes'?' plus a fee of [ ]':''}\n- Invoicing: we invoice the product value; the recipient invoices the advertising service (or agrees to self-billing)\n- Proof of delivery: links / screenshots`,
+    loan:`Loan note\n- Product / SKU / serial number: [ ]\n- Value: ${fmt(V)} (net)\n- Loan period: until [date] – return label enclosed\n- Remains property of [PGG company]\n- If not returned by [date], we will invoice the product at ${fmt(V)} plus VAT`,
+    gift:`Gift list – required fields\n- Recipient name and address\n- Date, product, SKU\n- Net value: ${fmt(V)}\n- Reason / occasion\n- Running total for this recipient this year`,
+    raffle:`Giveaway / raffle documentation\n- Campaign and terms of participation (link)\n- Winner name and address, date\n- Product, SKU, net value: ${fmt(V)}\n- Shipping proof`,
+    ic:`Intercompany invoice\n- From: [sending PGG company] – To: [receiving PGG company], both VAT numbers\n- Product / SKU / quantity\n- Price: ${fmt(V)} (cost) [+ mark-up per group TP policy]\n- VAT note: [see result above]\n- Reference: intercompany sample transfer`,
+    staff:`Payroll notification\n- Employee: [ ]\n- Product / SKU, date\n- Our net purchase price: ${fmt(V)}\n- Our retail price: [ ]\n- Kept / used privately until [date]`
+  };
+
+  /* ===== BRAND SIDE ===== */
+  let brandEcon='';
+  if(a.rtype==='ic'){
+    R.v.brand=L('Handled by the receiving company','Klärt die empfangende Gesellschaft');
+    brandEcon=L('Not part of this transfer. Brand claims are handled by the company that has the brand agreement.','Nicht Teil dieses Transfers. Brand-Claims klärt die Gesellschaft mit der Brand-Vereinbarung.');
+  } else if(pays(a)){
+    const credit=a.who==='credit', disc=credit&&a.cnType==='discount';
+    const B={todo:[],legal:[]};
+    if(a.confirm==='no') add('stop',L('Don’t ship yet','Noch nicht versenden'),L('Without the brand’s written confirmation, the brand can refuse to pay. We would end up with bad debt instead of a sample write-off.','Ohne schriftliche Bestätigung kann die Brand die Zahlung verweigern. Dann entsteht ein Forderungsausfall statt einer Sample-Abschreibung.'));
+    if(F<V) add('info',L('Partial funding','Teilfinanzierung'),L(`The brand covers ${fmt(F)} of ${fmt(V)}. PGG bears the rest.`,`Die Brand trägt ${fmt(F)} von ${fmt(V)}. PGG trägt den Rest.`));
+    tpl(L('Brand confirmation email','E-Mail Brand-Bestätigung'),T.confirm);
+    if(a.confirm==='adhoc'){
+      add('warn',L('Ad-hoc shipment – brand confirmation pending','Ad-hoc-Versand – Brand-Bestätigung ausstehend'),L('Shipping before the brand confirms is allowed as an exception. Until the brand confirms, the sample runs on PGG budget.','Versand vor der Brand-Bestätigung ist als Ausnahme erlaubt. Bis zur Bestätigung läuft das Sample auf PGG-Budget.'));
+      R.adhocTodo=[L('Get approval from the budget owner before shipping – PGG carries the cost until the brand confirms.','Vor dem Versand Freigabe des Budgetverantwortlichen einholen – bis zur Bestätigung trägt PGG die Kosten.'),
+        L('Send the confirmation request to the brand today (template below).','Bestätigungsanfrage noch heute an die Brand senden (Vorlage unten).'),
+        L('Mark the shipment as “brand confirmation pending”, deadline 5 working days.','Sendung als „Brand-Bestätigung ausstehend“ markieren, Frist 5 Arbeitstage.'),
+        L('Decide the recipient side before shipping anyway (loan, barter or gift) – that can’t be fixed afterwards.','Die Empfänger-Seite trotzdem vor dem Versand festlegen (Leihe, Tausch oder Geschenk) – das lässt sich nachträglich nicht korrigieren.'),
+        L('Brand confirms: issue the invoice or agree the credit note right away, exactly as shown below – the VAT treatment doesn’t change.','Brand bestätigt: Rechnung bzw. Gutschrift sofort genau wie unten beschrieben abwickeln – an der USt-Behandlung ändert sich nichts.'),
+        L('No confirmation after 5 working days: the cost stays on the requesting team’s budget, and Finance follows up with the Head of Brand.','Keine Bestätigung nach 5 Arbeitstagen: Die Kosten bleiben auf dem Budget des anfordernden Teams, Finance klärt mit dem Head of Brand.')];
+    }
+    if(disc){
+      B.title=L('Brand side: credit note as price reduction','Brand-Seite: Gutschrift als Preisnachlass');
+      R.v.brand=L('Credit note – price reduction','Gutschrift – Preisnachlass');
+      B.facts=[[L('Document','Beleg'),L('Brand’s credit note','Gutschrift der Brand')],[L('Amount','Betrag'),fmt(F)]];
+      B.todo.push(L('This is a price reduction on our purchases, not payment for a service of ours.','Das ist ein Preisnachlass auf unsere Einkäufe, keine Vergütung einer eigenen Leistung.'),
+                  L('Make sure the credit note names the campaign or samples so Finance can match it.','Die Gutschrift muss Kampagne bzw. Samples benennen, damit Finance sie zuordnen kann.'));
+      if(!uk){
+        if(a.brandloc==='home'){ B.vat=L('Our input VAT is reduced','Unsere Vorsteuer wird gekürzt'); B.todo.push(L(`Our input VAT on the original purchase is reduced by 19% of the credit amount (${fmt(F*0.19)}). The credit note must show the VAT.`,`Unsere Vorsteuer aus dem ursprünglichen Einkauf wird um 19% des Gutschriftsbetrags gekürzt (${fmt(F*0.19)}). Die Gutschrift muss die USt ausweisen.`)); B.legal.push('§ 17 Abs. 1 UStG (Entgeltminderung)'); }
+        else if(a.brandloc==='eu'){ B.vat=L('Correction of acquisition VAT – net zero','Korrektur Erwerbsteuer – im Saldo null'); B.todo.push(L('It reduces the basis of our intra-EU acquisition: acquisition VAT and input VAT are both corrected – net zero.','Sie mindert die Bemessungsgrundlage unseres innergemeinschaftlichen Erwerbs: Erwerbsteuer und Vorsteuer werden beide korrigiert – im Saldo null.')); B.legal.push('§ 1a, § 17 Abs. 1 UStG'); }
+        else { B.vat=L('No VAT entry','Keine USt-Buchung'); B.todo.push(L('Import VAT already paid stays as it is.','Bereits gezahlte Einfuhrumsatzsteuer bleibt unverändert.')); B.legal.push(L('Import VAT based on the customs value at import: § 11 UStG','EUSt auf Basis des Zollwerts bei Einfuhr: § 11 UStG')); }
+        B.legal.push(L('Marketing allowance without a concrete service from us = price reduction: Abschn. 10.3 UStAE','Werbekostenzuschuss ohne konkrete Gegenleistung = Entgeltminderung: Abschn. 10.3 UStAE'));
+      } else {
+        if(a.brandloc==='home'){ B.vat=L('Our input tax is reduced','Unsere Vorsteuer wird gekürzt'); B.todo.push(L('Adjust the input tax claimed on the original purchase.','Vorsteuer aus dem ursprünglichen Einkauf anpassen.')); B.legal.push('VAT Regulations 1995, reg. 38'); }
+        else { B.vat=L('No UK VAT adjustment','Keine UK-VAT-Korrektur'); B.todo.push(L('Import VAT was based on the value at import – no adjustment.','Import VAT basierte auf dem Wert bei Einfuhr – keine Anpassung.')); }
+      }
+      B.facts.push([L('VAT','USt'),B.vat]);
+      B.euro=EURO_NO+L('The credit note shows the agreed amount.','Die Gutschrift weist den vereinbarten Betrag aus.');
+      tpl(L('Credit note wording request','Anforderung Gutschrift-Text'),T.creditDisc);
+      brandEcon=L(`Grants us ${fmt(F)} as a reduction of our purchase price. VAT is corrected on both sides – no net VAT effect.`,`Gewährt uns ${fmt(F)} als Kaufpreisminderung. Die USt wird auf beiden Seiten korrigiert – kein Netto-USt-Effekt.`);
+    } else {
+      if(credit&&a.cnType==='unclear') add('warn',L('Ask the brand what the credit note is for','Bei der Brand klären, wofür die Gutschrift ist'),L('The tool treats it as payment for our seeding service. If it turns out to be a price reduction, the VAT treatment changes.','Das Tool behandelt sie als Vergütung unserer Seeding-Leistung. Ist es ein Preisnachlass, ändert sich die USt-Behandlung.'));
+      B.title=credit?L('Brand side: credit note for our seeding service','Brand-Seite: Gutschrift über unsere Seeding-Leistung'):L('Brand side: invoice our seeding service','Brand-Seite: Seeding-Leistung fakturieren');
+      if(credit){
+        B.todo.push(L('The brand’s credit note is a self-billed invoice for our service. It must say “Gutschrift” / “self-billing” and describe our seeding service.','Die Gutschrift der Brand ist eine Abrechnung über unsere Leistung. Sie muss „Gutschrift“ enthalten und unsere Seeding-Leistung beschreiben.'),
+                    L('We must have agreed to self-billing. If the credit note shows VAT that doesn’t belong there, object right away – otherwise we owe it.','Wir müssen der Abrechnung per Gutschrift zugestimmt haben. Weist sie falsche USt aus, sofort widersprechen – sonst schulden wir sie.'));
+        tpl(L('Credit note wording request','Anforderung Gutschrift-Text'),T.creditSvc);
+      } else B.todo.push(L('Invoice it as a “seeding / product placement service” – not as a product sale.','Als „Seeding-/Produktplatzierungsleistung“ fakturieren – nicht als Warenverkauf.'),
+                         a.confirm==='adhoc'?L(`Create the invoice as soon as the brand confirms, at ${fmt(F)} per sample.`,`Rechnung sofort nach Bestätigung der Brand erstellen, ${fmt(F)} pro Sample.`):L(`Create the invoice when the product ships, at ${fmt(F)} per sample.`,`Rechnung beim Versand erstellen, ${fmt(F)} pro Sample.`));
+      let k=a.brandloc;
+      if(!uk){
+        if(k==='eu'&&a.vatid==='no') k='eu_no'; if(k==='noneu'&&a.proof==='no') k='noneu_no';
+        B.legal.push(L('Place of supply for B2B services at the customer’s seat: § 3a Abs. 2 UStG','Leistungsort bei B2B-Leistungen am Sitz des Empfängers: § 3a Abs. 2 UStG'),
+                     L('Separate service, not a price reduction: Abschn. 10.3 UStAE','Eigenständige Leistung, keine Entgeltminderung: Abschn. 10.3 UStAE'));
+        if(credit) B.legal.push(L('Self-billing: § 14 Abs. 2 S. 2, § 14 Abs. 4 S. 1 Nr. 10 UStG; wrong VAT: § 14c UStG','Gutschrift: § 14 Abs. 2 S. 2, § 14 Abs. 4 S. 1 Nr. 10 UStG; unrichtiger Ausweis: § 14c UStG'));
+        if(k==='home'){ B.vat=L('19% VAT','19% USt'); R.v.brand=L('Yes, with 19% VAT','Ja, mit 19% USt'); B.todo.push(L('Standard document with 19% VAT and our VAT number. The brand deducts the VAT.','Normaler Beleg mit 19% USt und unserer USt-IdNr. Die Brand zieht die Vorsteuer.'));
+          B.note=L(`Seeding / product placement service, campaign …: ${fmt(F)} + 19% VAT ${fmt(F*0.19)} = ${fmt(F*1.19)}`,`Seeding-/Produktplatzierungsleistung, Kampagne …: ${fmt(F)} + 19% USt ${fmt(F*0.19)} = ${fmt(F*1.19)}`);
+          B.legal.push('§ 12 Abs. 1, § 14 Abs. 4, § 15 Abs. 1 S. 1 Nr. 1 UStG');
+          brandEcon=L(`Pays ${fmt(F)} + ${fmt(F*0.19)} VAT and deducts the VAT. Net cost: ${fmt(F)}.`,`Zahlt ${fmt(F)} + ${fmt(F*0.19)} USt und zieht die Vorsteuer. Nettokosten: ${fmt(F)}.`); }
+        else if(k==='eu'){ B.vat=L('No VAT – reverse charge','Keine USt – Reverse Charge'); R.v.brand=L('Yes, without VAT (reverse charge)','Ja, ohne USt (Reverse Charge)');
+          B.todo.push(L('Show both VAT numbers and the reverse charge note. Finance reports it in the EC Sales List.','Beide USt-IdNrn. und den Reverse-Charge-Hinweis angeben. Finance meldet es in der ZM.'));
+          B.note=L(`Seeding / product placement service, campaign …: ${fmt(F)}. Reverse charge – VAT to be accounted for by the recipient.`,`Seeding-/Produktplatzierungsleistung, Kampagne …: ${fmt(F)}. Steuerschuldnerschaft des Leistungsempfängers (Reverse Charge).`);
+          B.legal.push('§ 14a Abs. 1, § 18a, § 18e UStG; Art. 196 MwStSystRL');
+          brandEcon=L(`Pays ${fmt(F)}; accounts for and deducts the VAT itself. Net cost: ${fmt(F)}.`,`Zahlt ${fmt(F)}; erklärt und zieht die USt selbst. Nettokosten: ${fmt(F)}.`); }
+        else if(k==='eu_no'){ B.vat=L('VAT number needed first','Erst USt-IdNr. nötig'); R.v.brand=L('Yes – VAT number needed first','Ja – erst USt-IdNr.');
+          add('warn',L('Get the brand’s VAT number first','Erst USt-IdNr. der Brand einholen'),L('Without a checked EU VAT number we would have to charge 19% German VAT, which the brand can only claim back through the EU refund procedure.','Ohne geprüfte USt-IdNr. müssten wir 19% deutsche USt ausweisen; die Brand bekäme sie nur über das Vergütungsverfahren zurück.'));
+          B.todo.push(L('With a valid VAT number: no VAT, reverse charge.','Mit gültiger USt-IdNr.: keine USt, Reverse Charge.'));
+          B.legal.push(L('Without proof of business status: place of supply in Germany, § 3a Abs. 1 UStG','Ohne Unternehmernachweis: Leistungsort Inland, § 3a Abs. 1 UStG'));
+          brandEcon=L(`With VAT number: net cost ${fmt(F)}. Without: pays ${fmt(F*1.19)} and must claim the VAT back.`,`Mit USt-IdNr.: Nettokosten ${fmt(F)}. Ohne: zahlt ${fmt(F*1.19)} und muss die USt zurückfordern.`); }
+        else if(k==='noneu'){ B.vat=L('No German VAT','Keine deutsche USt'); R.v.brand=L('Yes, without VAT','Ja, ohne USt');
+          B.todo.push(L('No German VAT. Keep the brand’s proof of business status on file.','Keine deutsche USt. Unternehmernachweis der Brand ablegen.'));
+          B.note=L(`Seeding / product placement service, campaign …: ${fmt(F)}. Not subject to German VAT – place of supply is in the recipient’s country.`,`Seeding-/Produktplatzierungsleistung, Kampagne …: ${fmt(F)}. Nicht im Inland steuerbare Leistung.`);
+          B.legal.push(L('Proof of business status: Abschn. 3a.2 Abs. 11 UStAE','Unternehmernachweis: Abschn. 3a.2 Abs. 11 UStAE'));
+          brandEcon=L(`Pays ${fmt(F)}, no German VAT. Net cost: ${fmt(F)}.`,`Zahlt ${fmt(F)}, keine deutsche USt. Nettokosten: ${fmt(F)}.`); }
+        else { B.vat=L('Business proof needed first','Erst Unternehmernachweis'); R.v.brand=L('Yes – business proof needed first','Ja – erst Unternehmernachweis');
+          add('warn',L('Get proof that the brand is a company','Unternehmernachweis der Brand einholen'),L('Without it we would have to charge 19% German VAT, which a non-EU brand can hardly recover.','Ohne ihn müssten wir 19% deutsche USt ausweisen, die eine Drittlands-Brand kaum zurückbekommt.'));
+          B.legal.push('Abschn. 3a.2 Abs. 11 UStAE; § 3a Abs. 1 UStG');
+          brandEcon=L(`With proof: net cost ${fmt(F)}. Without: pays ${fmt(F*1.19)} incl. German VAT, recoverable only via refund procedure, if at all.`,`Mit Nachweis: Nettokosten ${fmt(F)}. Ohne: zahlt ${fmt(F*1.19)} inkl. USt, Erstattung nur über Vergütungsverfahren, wenn überhaupt.`); }
+      } else {
+        B.legal.push(L('Place of supply of services: VATA 1994 s.7A; HMRC VAT Notice 741A','Leistungsort: VATA 1994 s.7A; HMRC VAT Notice 741A'));
+        if(credit) B.legal.push(L('Self-billing agreement needed: HMRC VAT Notice 700/62','Self-Billing-Vereinbarung nötig: HMRC VAT Notice 700/62'));
+        if(k==='home'){ B.vat=L('20% VAT','20% VAT'); R.v.brand=L('Yes, with 20% VAT','Ja, mit 20% VAT'); B.note=L(`Seeding / product placement service: ${fmt(F)} + 20% VAT ${fmt(F*0.2)}`,`Seeding-Leistung: ${fmt(F)} + 20% VAT ${fmt(F*0.2)}`);
+          brandEcon=L(`Pays ${fmt(F)} + VAT and reclaims the VAT. Net cost: ${fmt(F)}.`,`Zahlt ${fmt(F)} + VAT und zieht sie. Nettokosten: ${fmt(F)}.`); }
+        else { B.vat=L('Outside the scope of UK VAT','Nicht UK-VAT-pflichtig'); R.v.brand=L('Yes, without VAT','Ja, ohne VAT'); B.todo.push(L('Keep evidence that the brand is a business outside the UK.','Nachweis aufbewahren, dass die Brand ein Unternehmen außerhalb UK ist.'));
+          B.note=L(`Seeding / product placement service: ${fmt(F)}. Outside the scope of UK VAT – customer belongs outside the UK.`,`Seeding-Leistung: ${fmt(F)}. Outside the scope of UK VAT – Leistungsempfänger außerhalb UK.`);
+          brandEcon=L(`Pays ${fmt(F)}, no UK VAT. Net cost: ${fmt(F)}.`,`Zahlt ${fmt(F)}, keine UK-VAT. Nettokosten: ${fmt(F)}.`); }
+      }
+      if(a.confirm==='adhoc') R.v.brand+=L(' – after confirmation',' – nach Bestätigung');
+      B.facts=[[L('Document','Beleg'),credit?L('Brand’s credit note','Gutschrift der Brand'):L('Our invoice','Unsere Rechnung')],[L('VAT','USt'),B.vat],[L('Amount','Betrag'),fmt(F)]];
+      B.euro=EURO_NO+L('Bill the agreed amount. A 1 EUR document would give away the money the brand agreed to pay.','Den vereinbarten Betrag abrechnen. Ein 1-EUR-Beleg würde das zugesagte Geld verschenken.');
+    }
+    R.blocks.push(B);
+  } else if(free){
+    const B={title:L('Brand side: free sample stock','Brand-Seite: kostenloser Sample-Bestand'),todo:[],legal:[]};
+    R.v.brand=L('No invoice','Keine Rechnung');
+    if(a.origin==='noneu'){
+      B.vat=uk?L('Import VAT (postponed accounting)','Import VAT (Postponed Accounting)'):L('Import VAT (recoverable)','EUSt (abziehbar)');
+      B.todo.push(L('Ask the brand for a realistic value on the proforma invoice. Never 0 or 1.','Von der Brand einen realistischen Wert auf der Proforma verlangen. Nie 0 oder 1.'),
+                  L('Duty and import VAT are based on this value. Import VAT is recovered; duty can be a real cost depending on the product.','Zoll und EUSt bemessen sich nach diesem Wert. Die EUSt wird erstattet; Zoll kann je nach Produkt echte Kosten verursachen.'));
+      B.euro=EURO_NO+L('For customs, 0 or 1 is wrong and risky. The customs value must reflect the real value.','Für den Zoll ist 0 oder 1 falsch und riskant. Der Zollwert muss dem echten Wert entsprechen.');
+      tpl(L('Proforma wording for the brand','Proforma-Text für die Brand'),T.proforma);
+      B.legal.push(uk?L('Customs valuation and import VAT: Taxation (Cross-border Trade) Act 2018; postponed VAT accounting','Zollwert und Import VAT: Taxation (Cross-border Trade) Act 2018; Postponed VAT Accounting')
+                     :L('Customs value without a sale: Art. 70, 74 UZK; duty relief only for samples of negligible value: Art. 86 ff. VO (EG) 1186/2009; import VAT deduction: § 15 Abs. 1 S. 1 Nr. 2 UStG','Zollwert ohne Kauf: Art. 70, 74 UZK; Zollbefreiung nur für Muster von geringem Wert: Art. 86 ff. VO (EG) 1186/2009; EUSt-Abzug: § 15 Abs. 1 S. 1 Nr. 2 UStG'));
+      add('info',L('Customs value','Zollwert'),L('Couriers often declare free products at 0 or a symbolic value. That is the risk – insist on a realistic value.','Kuriere melden Gratisware oft mit 0 oder symbolischem Wert an. Genau das ist das Risiko – auf realistischen Wert bestehen.'));
+    } else {
+      B.vat=L('No VAT for us','Keine USt für uns');
+      B.todo.push(L('Keep the brand’s delivery note with product details.','Lieferschein der Brand mit Produktdaten aufbewahren.'));
+      B.euro=EURO_NO+L('No invoice is needed. Document the real value in the ERP.','Keine Rechnung nötig. Echten Wert im ERP dokumentieren.');
+      if(!uk) B.legal.push(L('No intra-EU acquisition without payment: § 1 Abs. 1 Nr. 5, § 1a UStG','Kein innergemeinschaftlicher Erwerb ohne Entgelt: § 1 Abs. 1 Nr. 5, § 1a UStG'));
+    }
+    B.todo.push(L(`Book it into the ERP as sample stock at its real value (${fmt(V)}), not 0.01.`,`Im ERP als Sample-Bestand zum echten Wert (${fmt(V)}) einbuchen, nicht 0,01.`));
+    if(!uk) B.legal.push(L('Free receipt from a third party: acquisition cost = fair value, § 6 Abs. 4 EStG','Unentgeltlicher Erwerb von Dritten: AK = gemeiner Wert, § 6 Abs. 4 EStG'));
+    B.facts=[[L('Document','Beleg'),L('Delivery note','Lieferschein')],[L('VAT','USt'),B.vat],[L('Value','Wert'),fmt(V)]];
+    R.blocks.push(B);
+    brandEcon=L('Provides the product free of charge – its cost is the brand’s own production or purchase cost.','Stellt das Produkt kostenlos – Kosten sind die eigenen Herstell- bzw. Einkaufskosten der Brand.')+(a.origin==='noneu'?L(' Depending on delivery terms, we pay duty and import VAT as importer.',' Je nach Lieferbedingung zahlen wir Zoll und EUSt als Einführer.'):'');
+  } else {
+    R.blocks.push({title:L('Brand side: not involved','Brand-Seite: nicht beteiligt'),facts:[[L('Document','Beleg'),'–']],
+      todo:[L('Paid from PGG’s own budget – check the budget before shipping.','Aus PGG-Budget bezahlt – Budget vor Versand prüfen.'),L('Ask the Head of Brand whether the brand would fund samples like this.','Mit dem Head of Brand klären, ob die Brand solche Samples finanziert.')],
+      euro:L('Not applicable.','Nicht relevant.'),legal:[]});
+    R.v.brand=L('Not needed','Nicht nötig');
+    brandEcon=L('Not involved, no cost for the brand.','Nicht beteiligt, keine Kosten für die Brand.');
+  }
+
+  /* ===== RECIPIENT SIDE ===== */
+  const C={todo:[],legal:[]};
+  const E={income:F, incomeLabel:a.who==='credit'?L('Credit note from the brand','Gutschrift der Brand'):L('Payment from the brand','Zahlung der Brand'),
+           product:0, given:false, vat:0, vatUnknown:false, deductible:true, flat:0, note:''};
+  let recEcon='';
+  const TH=50, cur=uk?'£':'EUR';
+  const giftLabel=uk?'£50':'50 EUR';
+
+  if(ext(a)){
+    const isAg=a.rtype==='agency';
+    if(uk&&a.rloc==='nonuk'){
+      C.title=L('Recipient side: check with Finance','Empfänger-Seite: mit Finance klären'); R.v.rec=L('Check with Finance','Mit Finance klären');
+      C.todo.push(L('Cross-border shipments from the UK follow export and destination rules. Contact Group Finance before shipping.','Grenzüberschreitende Sendungen aus UK folgen Export- und Bestimmungslandregeln. Vor Versand Group Finance kontaktieren.'));
+      C.euro=EURO_NO+L('A symbolic invoice isn’t the solution.','Eine symbolische Rechnung ist keine Lösung.');
+      add('warn',L('Recipient outside the UK','Empfänger außerhalb UK'),L('The tool can’t decide this case.','Diesen Fall kann das Tool nicht entscheiden.'));
+      recEcon=L('Depends on the country.','Abhängig vom Land.'); E.vatUnknown=true; E.product=free?0:V; E.given=true;
+    } else {
+      const paid=a.paid==='yes', loan=a.ret==='yes';
+      const mode=loan?'loan':(paid||a.counter==='yes')?'barter':'gift';
+      if(isAg) C.todo.push(L('Contract, invoices and VAT numbers refer to the agency. If the creator is in another country than the agency, check with Finance.','Vertrag, Rechnungen und USt-IdNrn. beziehen sich auf die Agentur. Sitzt der Creator in einem anderen Land, mit Finance klären.'));
+      if(mode==='loan'){
+        C.title=L('Recipient side: loan','Empfänger-Seite: Leihe'); R.v.rec=L('No – loan note only','Nein – nur Leihschein'); C.vat=L('No VAT','Keine USt');
+        if(paid) C.todo.push(L('Paid deal: under PGG rules the product comes back.','Bezahlter Deal: nach PGG-Regel kommt das Produkt zurück.'));
+        C.todo.push(L(`Send a loan note: real value (${fmt(V)}), return date, price if not returned. Enclose a return label.`,`Leihschein beilegen: echter Wert (${fmt(V)}), Rückgabedatum, Preis bei Nichtrückgabe. Retourenlabel beilegen.`),
+                    L('Book the product to the “external / loan” location in the ERP – don’t book it out.','Im ERP auf Lagerort „Extern/Leihe“ umbuchen – nicht ausbuchen.'));
+        C.legal.push(L('A loan transfers no ownership – no supply: § 3 Abs. 1 UStG, §§ 598 ff. BGB','Leihe verschafft keine Verfügungsmacht – keine Lieferung: § 3 Abs. 1 UStG, §§ 598 ff. BGB'));
+        if(!uk&&a.rloc==='eu'){ C.todo.push(L('Temporary transfer within the EU: no VAT if it comes back within 24 months. Keep shipping and return proof.','Vorübergehende Verwendung im EU-Ausland: keine USt, wenn es innerhalb von 24 Monaten zurückkommt. Versand- und Rücksendenachweis aufbewahren.'),
+                                 L('If it isn’t returned, it becomes a supply – ask Finance (VAT-exempt with a VAT number, otherwise VAT of the destination country via OSS).','Kommt es nicht zurück, wird es zur Lieferung – Finance fragen (mit USt-IdNr. steuerfrei, sonst USt des Bestimmungslands über OSS).'));
+          C.legal.push(L('Temporary use, no taxable transfer: Abschn. 1a.2 Abs. 10 ff. UStAE','Vorübergehende Verwendung, kein Verbringen: Abschn. 1a.2 Abs. 10 ff. UStAE')); }
+        else if(!uk&&a.rloc==='noneu'){ C.todo.push(L('Temporary export: mark the shipment “temporary – to be returned”, ship DAP (recipient handles import charges). For higher values consider an ATA Carnet.','Vorübergehende Ausfuhr: Sendung als „temporary – to be returned“ kennzeichnen, DAP versenden (Empfänger trägt Einfuhrabgaben). Bei höheren Werten ATA-Carnet prüfen.'),
+                                  L('When it comes back, declare it as returned goods – then no import VAT or duty.','Bei Rückkehr als Rückware anmelden – dann keine EUSt und kein Zoll.'));
+          C.legal.push(L('Returned goods relief: Art. 203 UZK, § 12 EUStBV','Rückwarenbefreiung: Art. 203 UZK, § 12 EUStBV')); }
+        else C.todo.push(L(`If it isn’t returned by the deadline: invoice it at the agreed price plus ${rp} VAT.`,`Kommt es nicht fristgerecht zurück: zum vereinbarten Preis zzgl. ${rp} USt fakturieren.`));
+        C.euro=EURO_NO+L('No invoice for a loan. The loan note shows the real value – that’s what we invoice if it isn’t returned.','Keine Rechnung bei Leihe. Der Leihschein zeigt den echten Wert – den fakturieren wir bei Nichtrückgabe.');
+        tpl(L('Loan note','Leihschein'),T.loan);
+        recEcon=L('Uses the product for the agreed period. No tax consequences as long as it’s returned.','Nutzt das Produkt im vereinbarten Zeitraum. Keine steuerlichen Folgen, solange es zurückkommt.');
+      } else if(mode==='barter'){
+        E.product=free?0:V; E.given=true;
+        C.title=paid?L('Recipient side: barter plus fee','Empfänger-Seite: Tausch mit Baraufgabe'):L('Recipient side: barter','Empfänger-Seite: Tausch');
+        C.todo.push(L('Sign a short barter agreement before shipping: product, deliverables, deadline.','Vor Versand kurze Barter-Vereinbarung: Produkt, Gegenleistung, Frist.'));
+        if(paid) C.todo.push(L('The recipient keeps the product on top of the fee. Their invoice covers fee plus product value; our invoice covers the product value.','Der Empfänger behält das Produkt zusätzlich zum Honorar. Seine Rechnung umfasst Honorar plus Produktwert; unsere Rechnung den Produktwert.'),
+                             L('PGG rule: in paid deals the product normally comes back – this needs an exception.','PGG-Regel: Bei bezahlten Deals kommt das Produkt normalerweise zurück – das ist eine Ausnahme.'));
+        tpl(L('Barter agreement','Barter-Vereinbarung'),T.barter);
+        const baseTxt=SET.base==='incl'?L(`VAT calculated out of the product value`,`USt aus dem Produktwert herausgerechnet`):L(`VAT on top of the product value`,`USt auf den Produktwert`);
+        if(!uk&&a.rloc==='home'){
+          const reg=a.rvat==='yes';
+          C.vat=reg?L('19% VAT','19% USt'):L('19% VAT – cost for PGG','19% USt – Kosten für PGG'); R.v.rec=L('Yes, with 19% VAT','Ja, mit 19% USt');
+          C.todo.push(L(`We invoice the product value ${fmt(V)} + 19% VAT (${fmt(vatOn(V))}; ${baseTxt}).`,`Wir fakturieren den Produktwert ${fmt(V)} + 19% USt (${fmt(vatOn(V))}; ${baseTxt}).`));
+          if(reg) C.todo.push(L('The recipient invoices their advertising service with VAT; we deduct it. If they don’t invoice, we can self-bill with their agreement. Net, the VAT amounts cancel out.','Der Empfänger stellt seine Werbeleistung mit USt in Rechnung; wir ziehen die Vorsteuer. Ohne Rechnung können wir mit Zustimmung per Gutschrift abrechnen. Im Saldo heben sich die USt-Beträge auf.'));
+          else { C.todo.push(L('The recipient invoices us without VAT. We owe the VAT and can’t recover it – an extra cost for PGG.','Der Empfänger rechnet ohne USt ab. Wir schulden die USt und können sie nicht zurückholen – Mehrkosten für PGG.')); E.vat=vatOn(V); }
+          if(a.rvat==='unknown') add('warn',L('Ask the recipient about VAT','Empfänger zur USt fragen'),L('The result assumes they don’t charge VAT (the more expensive case).','Das Ergebnis unterstellt, dass er keine USt ausweist (teurerer Fall).'));
+          C.note=L(`Product … as consideration for advertising services per agreement dated …: ${fmt(V)} + 19% VAT`,`Produkt … als Gegenleistung für Werbeleistungen gem. Vereinbarung vom …: ${fmt(V)} + 19% USt`);
+          C.legal.push(L('Barter: § 3 Abs. 12 S. 2 UStG; base = value of the other service: § 10 Abs. 2 S. 2, 3 UStG, Abschn. 10.5 UStAE','Tauschähnlicher Umsatz: § 3 Abs. 12 S. 2 UStG; Bemessung = Wert der Gegenleistung: § 10 Abs. 2 S. 2, 3 UStG, Abschn. 10.5 UStAE'),
+                       L('Invoice obligation: § 14 Abs. 2 S. 1 Nr. 2 UStG; self-billing: § 14 Abs. 2 S. 2 UStG; small businesses: § 19 UStG','Rechnungspflicht: § 14 Abs. 2 S. 1 Nr. 2 UStG; Gutschrift: § 14 Abs. 2 S. 2 UStG; Kleinunternehmer: § 19 UStG'));
+          recEcon=reg?L(`Receives a product worth ${fmt(V)}. Invoices us and pays our invoice – VAT cancels out. The product value is taxable income for them.`,`Erhält ein Produkt im Wert von ${fmt(V)}. Rechnet gegenseitig ab – USt hebt sich auf. Der Produktwert ist für ihn steuerpflichtige Einnahme.`)
+                     :L(`Receives a product worth ${fmt(V)} and invoices us without VAT. The product value is taxable income for them.`,`Erhält ein Produkt im Wert von ${fmt(V)} und rechnet ohne USt ab. Der Produktwert ist für ihn steuerpflichtige Einnahme.`);
+        } else if(!uk&&a.rloc==='eu'){
+          if(a.rvatid==='yes'){
+            C.vat=L('No VAT – intra-EU supply','Keine USt – innergemeinschaftliche Lieferung'); R.v.rec=L('Yes, without VAT','Ja, ohne USt');
+            C.todo.push(L(`We invoice ${fmt(V)} as a VAT-exempt intra-Community supply with both VAT numbers. Keep proof of arrival; Finance reports it in the EC Sales List.`,`Wir fakturieren ${fmt(V)} als steuerfreie innergemeinschaftliche Lieferung mit beiden USt-IdNrn. Gelangensnachweis aufbewahren; Finance meldet in der ZM.`),
+                        L('The recipient invoices their service to us without VAT (reverse charge). We declare and deduct the VAT – net zero.','Der Empfänger rechnet seine Leistung ohne USt ab (Reverse Charge). Wir erklären und ziehen die USt – im Saldo null.'));
+            C.note=L(`Product …: ${fmt(V)}. Tax-exempt intra-Community supply.`,`Produkt …: ${fmt(V)}. Steuerfreie innergemeinschaftliche Lieferung.`);
+            C.legal.push('§ 4 Nr. 1 Buchst. b, § 6a, § 14a Abs. 3, § 18a UStG; § 17a UStDV',L('Their service to us: § 3a Abs. 2, § 13b Abs. 1, Abs. 5 UStG','Deren Leistung an uns: § 3a Abs. 2, § 13b Abs. 1, Abs. 5 UStG'));
+            recEcon=L(`Receives a product worth ${fmt(V)}; accounts for acquisition VAT in their country. Taxable income for them.`,`Erhält ein Produkt im Wert von ${fmt(V)}; versteuert den Erwerb im eigenen Land. Für ihn steuerpflichtig.`);
+          } else {
+            C.vat=L('VAT of destination country (OSS)','USt des Bestimmungslands (OSS)'); R.v.rec=L('Yes, with destination VAT','Ja, mit USt des Bestimmungslands'); E.vatUnknown=true;
+            C.todo.push(L('Without a VAT number our supply is taxed in the recipient’s country at its VAT rate, declared via OSS. This is an extra cost for PGG.','Ohne USt-IdNr. wird unsere Lieferung im Land des Empfängers mit dessen Steuersatz besteuert, erklärt über OSS. Das sind Mehrkosten für PGG.'),
+                        L('Their invoice to us: no VAT – we account for the VAT under reverse charge and deduct it, net zero.','Deren Rechnung an uns: ohne USt – wir erklären die USt im Reverse-Charge-Verfahren und ziehen sie, im Saldo null.'));
+            C.legal.push('§ 3c, § 18j UStG; § 13b UStG');
+            recEcon=L(`Receives a product worth ${fmt(V)}. Taxable income for them.`,`Erhält ein Produkt im Wert von ${fmt(V)}. Für ihn steuerpflichtig.`);
+          }
+        } else if(!uk&&a.rloc==='noneu'){
+          C.vat=L('No VAT – export','Keine USt – Ausfuhr'); R.v.rec=L('Yes, without VAT (export)','Ja, ohne USt (Ausfuhr)');
+          C.todo.push(L(`We invoice ${fmt(V)} as a VAT-exempt export. Keep the export proof (customs declaration or courier export record).`,`Wir fakturieren ${fmt(V)} als steuerfreie Ausfuhrlieferung. Ausfuhrnachweis aufbewahren (Ausfuhranmeldung bzw. Kurier-Exportbeleg).`),
+                      L('Ship DAP – the recipient pays import charges. Never DDP without checking: we could need a foreign VAT registration.','DAP versenden – Empfänger zahlt Einfuhrabgaben. Nie DDP ohne Prüfung: sonst droht eine ausländische USt-Registrierung.'),
+                      L('Their service to us: reverse charge – we declare and deduct the VAT, net zero.','Deren Leistung an uns: Reverse Charge – wir erklären und ziehen die USt, im Saldo null.'));
+          C.note=L(`Product …: ${fmt(V)}. Tax-exempt export delivery.`,`Produkt …: ${fmt(V)}. Steuerfreie Ausfuhrlieferung.`);
+          C.legal.push('§ 4 Nr. 1 Buchst. a, § 6 UStG; §§ 8 ff. UStDV',L('Their service to us: § 3a Abs. 2, § 13b UStG','Deren Leistung an uns: § 3a Abs. 2, § 13b UStG'));
+          tpl(L('Proforma / customs wording','Proforma-/Zolltext'),T.proforma.replace('no commercial value','barter – no payment').replace('free sample – no payment','product in exchange for advertising services'));
+          recEcon=L(`Receives a product worth ${fmt(V)}; pays import charges in their country. Taxable income for them.`,`Erhält ein Produkt im Wert von ${fmt(V)}; zahlt Einfuhrabgaben im eigenen Land. Für ihn steuerpflichtig.`);
+        } else {
+          const reg=a.rvat==='yes';
+          C.vat=reg?L('20% VAT','20% VAT'):L('20% VAT – cost for the UK company','20% VAT – Kosten für die UK-Gesellschaft'); R.v.rec=L('Yes, with 20% VAT','Ja, mit 20% VAT');
+          C.todo.push(L(`We account for 20% VAT on the product value ${fmt(V)} (${fmt(vatOn(V))}; ${baseTxt}).`,`Wir führen 20% VAT auf den Produktwert ${fmt(V)} ab (${fmt(vatOn(V))}; ${baseTxt}).`),
+                      reg?L('The recipient invoices their service with VAT; we reclaim it – net zero.','Der Empfänger rechnet mit VAT ab; wir ziehen sie – im Saldo null.'):L('The recipient isn’t VAT-registered – the VAT is a cost for the UK company.','Der Empfänger ist nicht registriert – die VAT ist ein Kostenfaktor für die UK-Gesellschaft.'));
+          if(!reg) E.vat=vatOn(V);
+          if(a.rvat==='unknown') add('warn',L('Ask the recipient about VAT','Empfänger zur VAT fragen'),L('The result assumes they aren’t VAT-registered.','Das Ergebnis unterstellt keine VAT-Registrierung.'));
+          C.legal.push(L('Supply for non-monetary consideration: VATA 1994 s.19(3)','Lieferung gegen nicht-monetäre Gegenleistung: VATA 1994 s.19(3)'));
+          recEcon=L(`Receives a product worth ${fmt(V)}. Taxable income for them.`,`Erhält ein Produkt im Wert von ${fmt(V)}. Für ihn steuerpflichtig.`);
+        }
+        C.todo.push(L('Collect proof of delivery (links, screenshots).','Nachweis der Gegenleistung sammeln (Links, Screenshots).'));
+        C.euro=EURO_NO+L('The tax office uses the product value anyway. A 1 EUR invoice would show too little VAT.','Das Finanzamt setzt ohnehin den Produktwert an. Eine 1-EUR-Rechnung würde zu wenig USt ausweisen.');
+        if(!uk) C.legal.push(L('Not a gift → fully deductible: § 4 Abs. 4 EStG','Kein Geschenk → voll abziehbar: § 4 Abs. 4 EStG'));
+      } else {
+        // gift
+        E.product=free?0:V; E.given=true;
+        const total=V+num(a.others); const small=total<=TH;
+        C.title=small?L('Recipient side: small gift','Empfänger-Seite: geringwertiges Geschenk'):L(`Recipient side: gift above ${giftLabel}`,`Empfänger-Seite: Geschenk über ${giftLabel}`);
+        R.v.rec=small?L('No invoice','Keine Rechnung'):L('No invoice – but expensive','Keine Rechnung – aber teuer');
+        tpl(L('Gift list','Geschenkeliste'),T.gift);
+        C.todo.push(L('Record recipient, product, value and date in the gift list.','Empfänger, Produkt, Wert und Datum in der Geschenkeliste erfassen.'));
+        if(!uk){
+          if(small){ C.vat=L('No VAT','Keine USt'); C.todo.push(L(`Keep the total per person within ${giftLabel} per calendar year.`,`Summe pro Person im Kalenderjahr unter ${giftLabel} halten.`));
+            C.legal.push(L('Low-value gifts: § 3 Abs. 1b S. 1 Nr. 3 UStG; deductible up to 50 EUR: § 4 Abs. 5 S. 1 Nr. 1 EStG; recording: § 4 Abs. 7 EStG','Geschenke von geringem Wert: § 3 Abs. 1b S. 1 Nr. 3 UStG; abziehbar bis 50 EUR: § 4 Abs. 5 S. 1 Nr. 1 EStG; Aufzeichnung: § 4 Abs. 7 EStG')); }
+          else { C.vat=freeNoInput?L('No VAT','Keine USt'):L('19% VAT – cost for PGG','19% USt – Kosten für PGG'); E.vat=freeNoInput?0:V*0.19; E.deductible=false; E.flat=0.30*1.055*(V+E.vat);
+            C.todo.unshift(L('Better: turn it into a barter (agreed deliverable) or a loan.','Besser: als Tausch (vereinbarte Gegenleistung) oder Leihe gestalten.'));
+            C.todo.push(freeNoInput?L('No VAT cost (we never deducted VAT on this free product), but the cost is not tax-deductible.','Keine USt-Kosten (keine Vorsteuer gezogen), aber die Kosten sind nicht abziehbar.')
+                                   :L(`The input VAT on the product must be paid back (${fmt(V*0.19)}), and the cost is not tax-deductible.`,`Die Vorsteuer auf das Produkt ist zu korrigieren (${fmt(V*0.19)}), und die Kosten sind nicht abziehbar.`),
+                        L('Optional: PGG pays a 30% flat tax so the gift is tax-free for the recipient – decide with Finance.','Optional: PGG zahlt 30% Pauschalsteuer, damit das Geschenk für den Empfänger steuerfrei ist – mit Finance entscheiden.'));
+            add('warn',L('Expensive gift','Teures Geschenk'),L(`Above ${giftLabel} per person and year, a gift is the most expensive option. A barter or loan is clearly cheaper.`,`Über ${giftLabel} pro Person und Jahr ist ein Geschenk die teuerste Variante. Tausch oder Leihe sind deutlich günstiger.`));
+            C.legal.push('§ 15 Abs. 1a, § 17 Abs. 2 Nr. 5 UStG; § 4 Abs. 5 S. 1 Nr. 1, § 4 Abs. 7, § 37b EStG'); }
+          if(a.rloc==='noneu'){ C.todo.push(L('Customs: declare as gift with the real value. The recipient may pay import charges.','Zoll: als Geschenk mit echtem Wert anmelden. Der Empfänger zahlt ggf. Einfuhrabgaben.'));
+            C.legal.push(L('Export exemption does not apply to gifts: § 6 Abs. 5 UStG','Ausfuhrbefreiung gilt nicht für unentgeltliche Wertabgaben: § 6 Abs. 5 UStG')); }
+        } else {
+          C.vat=small?L('No VAT','Keine VAT'):L('20% VAT on cost','20% VAT auf Kosten'); if(!small){ E.vat=free&&a.origin!=='noneu'?0:V*0.2; }
+          E.deductible=false;
+          C.todo.push(L('Corporation tax: gifts are not deductible unless they carry a conspicuous advert and stay within £50 per person and year.','Corporation Tax: Geschenke sind nicht abziehbar, außer mit deutlicher Werbung und bis £50 pro Person und Jahr.'));
+          if(!small) C.todo.unshift(L('Better: turn it into a barter or a loan. Above £50 per person in 12 months, VAT is due on the cost of all gifts to that person.','Besser: Tausch oder Leihe. Über £50 pro Person in 12 Monaten fällt VAT auf die Kosten aller Geschenke an diese Person an.'));
+          C.legal.push('HMRC VAT Notice 700/7; CTA 2009 s.1300');
+        }
+        C.euro=EURO_NO+L('A symbolic 1 EUR price doesn’t reliably change the treatment: it can still count as a gift – or, if something was agreed in return, as a barter at full value.','Ein symbolischer Preis von 1 EUR ändert die Behandlung nicht verlässlich: Es kann weiter als Geschenk gelten – oder bei vereinbarter Gegenleistung als Tausch zum vollen Wert.');
+        recEcon=small?L('Receives the product. If it relates to their influencer work, it can still be taxable income.','Erhält das Produkt. Steht es im Zusammenhang mit der Influencer-Tätigkeit, kann es trotzdem steuerpflichtig sein.')
+                     :L(`Receives a product worth ${fmt(V)}. Usually taxable income – unless PGG pays the flat tax.`,`Erhält ein Produkt im Wert von ${fmt(V)}. In der Regel steuerpflichtig – außer PGG zahlt die Pauschalsteuer.`);
+      }
+    }
+  } else if(a.rtype==='consumer'){
+    E.product=free?0:V; E.given=true;
+    const small=V<=TH;
+    C.title=L('Recipient side: prize for end customers','Empfänger-Seite: Preis für Endkunden'); R.v.rec=L('No invoice','Keine Rechnung');
+    tpl(L('Giveaway documentation','Gewinnspiel-Dokumentation'),T.raffle);
+    C.todo.push(L('Document the giveaway: terms, winner, product, value, shipping proof.','Gewinnspiel dokumentieren: Bedingungen, Gewinner, Produkt, Wert, Versandnachweis.'));
+    if(!uk){
+      if(small){ C.vat=L('No VAT','Keine USt'); }
+      else { C.vat=freeNoInput?L('No VAT','Keine USt'):L('19% VAT – cost for PGG','19% USt – Kosten für PGG'); E.vat=freeNoInput?0:V*0.19;
+        C.todo.push(L(`Prize above 50 EUR: VAT on the purchase price is due (${fmt(E.vat)}).`,`Preis über 50 EUR: USt auf den Einkaufspreis fällt an (${fmt(E.vat)}).`)); }
+      C.todo.push(L('Prizes from public giveaways are generally not taxable for private winners – no flat tax needed.','Gewinne aus öffentlichen Gewinnspielen sind für private Gewinner grundsätzlich nicht steuerbar – keine Pauschalsteuer nötig.'));
+      C.legal.push(L('Prizes: § 3 Abs. 1b S. 1 Nr. 3 UStG, Abschn. 3.3 Abs. 10 UStAE; § 4 Abs. 5 S. 1 Nr. 1 EStG','Sachpreise: § 3 Abs. 1b S. 1 Nr. 3 UStG, Abschn. 3.3 Abs. 10 UStAE; § 4 Abs. 5 S. 1 Nr. 1 EStG'));
+      if(a.cloc==='noneu') C.todo.push(L('Customs: declare as gift with the real value; the winner may pay import charges.','Zoll: als Geschenk mit echtem Wert anmelden; der Gewinner zahlt ggf. Einfuhrabgaben.'));
+    } else {
+      if(a.cloc==='nonuk') add('warn',L('Prize goes outside the UK','Preis geht ins Ausland'),L('Check export and destination rules with Finance.','Export- und Bestimmungslandregeln mit Finance klären.'));
+      C.vat=small?L('No VAT','Keine VAT'):L('20% VAT on cost','20% VAT auf Kosten'); if(!small) E.vat=V*0.2;
+      C.legal.push('HMRC VAT Notice 700/7');
+    }
+    C.euro=EURO_NO+L('No invoice to the winner.','Keine Rechnung an den Gewinner.');
+    recEcon=L('Receives the prize. Usually no tax for private winners.','Erhält den Preis. Für private Gewinner meist steuerfrei.');
+  } else if(a.rtype==='own'){
+    R.v.rec=L('No invoice – internal booking','Keine Rechnung – interne Buchung'); C.vat=L('No VAT','Keine USt');
+    if(a.okind==='demo'){ C.title=L('Own use: demo, display or test unit','Eigennutzung: Demo-, Ausstellungs- oder Testgerät');
+      C.todo.push(L('Rebook from trading stock to demo / internal use in the ERP.','Im ERP von Handelsware auf Demo/Eigennutzung umbuchen.'),
+                  L(uk?'If used long-term, capitalise per group policy.':'If used for more than a year: fixed asset; up to 800 EUR net it can be expensed at once.',uk?'Bei langfristiger Nutzung gemäß Konzernrichtlinie aktivieren.':'Bei Nutzung über ein Jahr: Anlagevermögen; bis 800 EUR netto sofort abziehbar.'),
+                  L(`If it’s later sold as B-stock: normal sale with ${rp} VAT.`,`Späterer Verkauf als B-Ware: normaler Verkauf mit ${rp} USt.`));
+      if(!uk) C.legal.push(L('Low-value assets: § 6 Abs. 2 EStG','Geringwertige Wirtschaftsgüter: § 6 Abs. 2 EStG'));
+      recEcon=L('Stays with PGG.','Bleibt bei PGG.'); }
+    else if(a.okind==='build'){ C.title=L('Own use: built into a system we sell','Eigennutzung: in verkauftes System verbaut');
+      C.todo.push(L('No separate tax event – book it as material consumed for the system we sell.','Kein eigener Steuertatbestand – als Materialverbrauch für das verkaufte System buchen.'),L(`VAT arises on the sale of the system at ${rp}.`,`USt entsteht beim Verkauf des Systems mit ${rp}.`));
+      recEcon=L('The customer buys the system at full price.','Der Kunde kauft das System zum vollen Preis.'); }
+    else { C.title=L('Own use: used up in testing','Eigennutzung: im Test verbraucht'); E.product=free?0:V; E.given=true;
+      C.todo.push(L('Write it off with documentation (test report, photos). No VAT correction for goods used up in the business.','Mit Dokumentation abschreiben (Testbericht, Fotos). Keine Vorsteuerkorrektur bei betrieblichem Verbrauch.'));
+      recEcon=L('–','–'); }
+    C.euro=EURO_NO+L('No invoice – internal booking at the real value.','Keine Rechnung – interne Buchung zum echten Wert.');
+  } else if(a.rtype==='staff'){
+    tpl(L('Payroll notification','Meldung an Payroll'),T.staff);
+    R.v.rec=L('No invoice – payroll','Keine Rechnung – Lohnabrechnung');
+    if(a.skind==='keep'){
+      E.product=free?0:V; E.given=true;
+      C.title=L('Employee keeps the product','Mitarbeiter behält das Produkt');
+      if(!uk){ C.vat=freeNoInput?L('No VAT','Keine USt'):L('19% VAT on purchase price','19% USt auf Einkaufspreis'); E.vat=freeNoInput?0:V*0.19;
+        C.todo.push(L('Report to payroll: as we sell this product, the benefit is 96% of our retail price; employees have a staff discount allowance of 1,080 EUR per year – above that it’s taxable wage.','An Payroll melden: Da wir das Produkt verkaufen, gilt 96% unseres Endpreises als Vorteil; Rabattfreibetrag 1.080 EUR pro Jahr – darüber steuerpflichtiger Arbeitslohn.'),
+                    freeNoInput?L('No VAT, as we never deducted VAT on this free product.','Keine USt, da auf das Gratisprodukt keine Vorsteuer gezogen wurde.'):L(`VAT on the purchase price is due (${fmt(V*0.19)}).`,`USt auf den Einkaufspreis fällt an (${fmt(V*0.19)}).`));
+        C.legal.push('§ 3 Abs. 1b S. 1 Nr. 2, § 10 Abs. 4 Nr. 1 UStG; § 8 Abs. 3 EStG'); }
+      else { C.vat=V>TH?L('20% VAT on cost','20% VAT auf Kosten'):L('No VAT','Keine VAT'); if(V>TH) E.vat=V*0.2;
+        C.todo.push(L('Report to payroll: benefit in kind, unless it’s a trivial benefit (max. £50, not a reward for work).','An Payroll melden: Sachbezug, außer Trivial Benefit (max. £50, keine Arbeitsbelohnung).'));
+        C.legal.push('ITEPA 2003 s.323A; HMRC VAT Notice 700/7'); }
+      recEcon=L('Receives the product; may be taxable wage.','Erhält das Produkt; ggf. steuerpflichtiger Arbeitslohn.');
+    } else {
+      C.title=L('Employee uses it privately and returns it','Mitarbeiter nutzt privat und gibt zurück'); C.vat=L('Minor VAT on private use – Finance','Geringe USt auf Privatnutzung – Finance');
+      if(!uk){ C.todo.push(L('Private use of company IT and telecom devices incl. accessories (PC hardware, peripherals) is tax-free for the employee. Not covered: e.g. chairs or desks.','Private Nutzung betrieblicher IT- und TK-Geräte inkl. Zubehör (PC-Hardware, Peripherie) ist für den Mitarbeiter steuerfrei. Nicht erfasst: z. B. Stühle oder Tische.'),
+                           L('Keep a loan note with the return date.','Leihschein mit Rückgabedatum anlegen.'));
+        C.legal.push('§ 3 Nr. 45 EStG; § 3 Abs. 9a Nr. 1 UStG'); }
+      else C.todo.push(L('Payroll to assess the benefit of private use.','Payroll prüft den Vorteil aus Privatnutzung.'));
+      tpl(L('Loan note','Leihschein'),T.loan);
+      recEcon=L('Uses the product temporarily.','Nutzt das Produkt vorübergehend.');
+    }
+    C.euro=EURO_NO+L('No invoice – the payroll handles it.','Keine Rechnung – läuft über die Lohnabrechnung.');
+  } else if(a.rtype==='ic'){
+    tpl(L('Intercompany invoice','Intercompany-Rechnung'),T.ic);
+    const loan=a.icret==='yes';
+    C.title=loan?L('Intercompany: temporary loan','Intercompany: vorübergehende Leihe'):L('Intercompany: transfer','Intercompany: Übertragung');
+    R.v.rec=loan?L('No – transfer note','Nein – Überlassungsbeleg'):L('Yes – intercompany invoice','Ja – Intercompany-Rechnung');
+    if(!loan){ E.product=V; E.given=true; E.income=V; E.incomeLabel=L('Intercompany price received (at cost)','Erhaltener IC-Preis (zu Kosten)');
+      C.todo.push(L(`Price at least our cost (${fmt(V)}); mark-up per group transfer pricing policy. 0 between group companies isn’t arm’s length.`,`Preis mindestens unsere Kosten (${fmt(V)}); Aufschlag gemäß Konzern-Verrechnungspreisrichtlinie. 0 zwischen Konzerngesellschaften ist nicht fremdüblich.`)); }
+    if(!uk){
+      C.legal.push(L('Arm’s length: § 1 AStG; hidden profit distribution / contribution (vGA / verdeckte Einlage)','Fremdvergleich: § 1 AStG; vGA / verdeckte Einlage'));
+      if(a.icdest==='de'){
+        if(loan){ C.vat=L('No VAT','Keine USt'); C.todo.push(L('Loan within Germany: no supply. Keep a transfer note with return date.','Leihe im Inland: keine Lieferung. Überlassungsbeleg mit Rückgabedatum.')); }
+        else if(a.organ==='yes'){ C.vat=L('No VAT – internal to VAT group','Keine USt – Innenumsatz'); C.todo.push(L('Within the VAT group: non-taxable internal transaction – internal transfer note, no VAT.','Innerhalb der Organschaft: nicht steuerbarer Innenumsatz – interner Beleg ohne USt.')); C.legal.push('§ 2 Abs. 2 Nr. 2 UStG'); }
+        else { C.vat=L('19% VAT','19% USt'); C.todo.push(L('Invoice with 19% VAT; the receiving company deducts it.','Rechnung mit 19% USt; die empfangende Gesellschaft zieht die Vorsteuer.'));
+          if(a.organ==='unknown') add('warn',L('Check the VAT group','Organschaft klären'),L('Ask Finance whether both companies are in the same VAT group. Without a VAT group: 19% VAT.','Finance fragen, ob beide Gesellschaften in derselben Organschaft sind. Ohne Organschaft: 19% USt.')); }
+      } else if(a.icdest==='eu'){
+        if(loan){ C.vat=L('No VAT','Keine USt'); C.todo.push(L('Temporary use abroad: no taxable transfer if it comes back within 24 months. Keep shipping and return proof.','Vorübergehende Verwendung: kein Verbringen, wenn es innerhalb von 24 Monaten zurückkommt. Versand- und Rücksendenachweis aufbewahren.')); C.legal.push('Abschn. 1a.2 Abs. 10 ff. UStAE'); }
+        else { C.vat=L('No VAT – intra-EU supply','Keine USt – innergemeinschaftliche Lieferung'); C.todo.push(L('VAT-exempt intra-Community supply: both VAT numbers, proof of arrival, EC Sales List. The receiving company declares the acquisition.','Steuerfreie innergemeinschaftliche Lieferung: beide USt-IdNrn., Gelangensnachweis, ZM. Die empfangende Gesellschaft erklärt den Erwerb.')); C.legal.push('§ 4 Nr. 1 Buchst. b, § 6a, § 18a UStG'); }
+      } else {
+        if(loan){ C.vat=L('No VAT','Keine USt'); C.todo.push(L('Temporary export: receiving company uses temporary admission or ATA Carnet; on return declare as returned goods – no import VAT or duty.','Vorübergehende Ausfuhr: Empfänger nutzt vorübergehende Verwendung oder ATA-Carnet; bei Rückkehr Rückwarenanmeldung – keine EUSt, kein Zoll.')); C.legal.push('Art. 203 UZK, § 12 EUStBV'); }
+        else { C.vat=L('No VAT – export','Keine USt – Ausfuhr'); C.todo.push(L('VAT-exempt export with export proof. The receiving company pays import VAT (recoverable; UK: postponed VAT accounting) and any duty.','Steuerfreie Ausfuhr mit Ausfuhrnachweis. Die empfangende Gesellschaft zahlt EUSt (abziehbar; UK: Postponed VAT Accounting) und ggf. Zoll.')); C.legal.push('§ 4 Nr. 1 Buchst. a, § 6 UStG');
+          tpl(L('Proforma / customs wording','Proforma-/Zolltext'),T.proforma.replace('free sample – no payment','intercompany transfer at cost')); }
+      }
+    } else {
+      C.legal.push('TIOPA 2010 Part 4');
+      if(loan){ C.vat=L('No VAT','Keine VAT'); C.todo.push(L('Temporary export: returned goods relief when it comes back.','Vorübergehende Ausfuhr: bei Rückkehr Returned Goods Relief.')); }
+      else { C.vat=L('Zero-rated export','Steuerfreier Export (zero-rated)'); C.todo.push(L('Zero-rated export with export evidence. The receiving company pays import VAT (recoverable) and any duty.','Zero-rated Export mit Exportnachweis. Die empfangende Gesellschaft zahlt Import-VAT (abziehbar) und ggf. Zoll.'));
+        tpl(L('Proforma / customs wording','Proforma-/Zolltext'),T.proforma.replace('free sample – no payment','intercompany transfer at cost')); }
+    }
+    C.euro=EURO_NO+L('Intercompany always at an arm’s length price – never 0 or 1.','Intercompany immer zum fremdüblichen Preis – nie 0 oder 1.');
+    recEcon=loan?L('Uses the product temporarily.','Nutzt das Produkt vorübergehend.'):L(`Pays ${fmt(V)} (+ mark-up); import VAT, if any, is recoverable. Group view: neutral except duty.`,`Zahlt ${fmt(V)} (+ Aufschlag); EUSt ist abziehbar. Konzernsicht: neutral außer Zoll.`);
+  }
+  if(!C.facts) C.facts=[[L('VAT','USt'),C.vat||'–'],[L('Value','Wert'),fmt(V)]];
+  R.blocks.push(C);
+
+  /* economics */
+  const freeIncome=(!uk&&free&&E.given&&a.rtype!=='ic')?V:0;  // § 6 Abs. 4 EStG
+  const expense=E.given?(a.rtype==='ic'?V:(free?(uk?0:V):V)):0;
+  const vat=E.vatUnknown?0:E.vat;
+  const pre=E.income-E.product-vat;
+  const taxable=E.income+freeIncome-(E.deductible?expense+vat:0);
+  const tax=TAX*taxable;
+  R.econ={...E, pre, tax, after:pre-tax, brand:brandEcon, rec:recEcon, freeIncome, adhoc:a.confirm==='adhoc', afterNo:(pre-F)-(tax-TAX*F)};
+  return R;
+}
+
+/* ---------- results ---------- */
+let DL=null;
+const nativeDL={save:async({filename,data})=>{ const blob=data instanceof Blob?data:new Blob([data]); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500); return {status:'saved'}; }};
+try{ if(window.claude&&window.claude.use) window.claude.use('downloads').then(d=>{ DL=d; if(S.done) render(); }).catch(()=>{}); else DL=nativeDL; }catch(e){ DL=nativeDL; }
+S.doc={};
+const today=()=>new Date().toISOString().slice(0,10);
+const labelOf=q=>{ const v=S.a[q.id]; if(q.type==='num') return fmt(num(v)); const o=qOpts(q).find(o=>o.v===v); return o?t(o.l):''; };
+const strip=s=>String(s).replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const docFields=()=>[['req',L('Requested by','Angefordert von')],['rec',L('Recipient (name)','Empfänger (Name)')],['sku',L('Product / SKU','Produkt / SKU')],['camp',L('Campaign / reason','Kampagne / Anlass')],['date',L('Shipping date','Versanddatum')]];
+const recLabel=a=>a.rtype==='ic'?L('Intercompany document','Intercompany-Beleg'):(a.rtype==='own'||a.rtype==='staff')?L('Document','Beleg'):L('Invoice to the recipient','Rechnung an den Empfänger');
+function todoGroups(R){
+  const g=[];
+  if(R.alerts.some(x=>x.t==='stop')) g.push({h:L('Before anything else','Vor allem anderen'),stop:true,items:[L('Don’t ship yet: get the brand’s written confirmation first – or, if it has to go out now, choose “ad-hoc” and get budget approval.','Noch nicht versenden: erst die schriftliche Bestätigung der Brand einholen – oder, wenn es sofort raus muss, „ad-hoc“ wählen und Budgetfreigabe einholen.')]});
+  if(R.adhocTodo) g.push({h:L('Ad-hoc shipment','Ad-hoc-Versand'),items:R.adhocTodo});
+  R.blocks.forEach(X=>{ if(X.todo&&X.todo.length) g.push({h:X.title.split(':')[0],items:X.todo}); });
+  g.push({h:L('Documentation','Dokumentation'),items:[L('Book the sample in the ERP at its real value – never 0.01.','Sample im ERP zum echten Wert buchen – nie 0,01.'),L('Download the Excel summary (or copy it) and file it with the shipment.','Excel-Zusammenfassung herunterladen (oder kopieren) und zur Sendung ablegen.')]});
+  return g;
+}
+function econRows(R){
+  const E=R.econ, r=[];
+  if(E.income) r.push([E.incomeLabel,E.income]);
+  r.push([L('Product given away','Abgegebenes Produkt')+(E.product===0&&E.given?L(' (free from the brand)',' (gratis von der Brand)'):''),-E.product]);
+  r.push([L('VAT we can’t recover','Nicht erstattungsfähige USt'),E.vatUnknown?L('depends on country','länderabhängig'):-E.vat]);
+  r.push([L('Result before income tax','Ergebnis vor Ertragsteuern'),E.pre,'total']);
+  r.push([L(`Income tax effect (${SET.tax}%)`,`Ertragsteuereffekt (${SET.tax}%)`)+(E.deductible?'':L(' – cost not deductible',' – Kosten nicht abziehbar'))+(E.freeIncome?L('; free product counts as income at its value','; Gratisprodukt gilt mit seinem Wert als Ertrag'):''),-E.tax,'sub']);
+  r.push([L('Result after income tax','Ergebnis nach Ertragsteuern'),E.after,'hl']);
+  if(E.flat) r.push([L('Optional flat tax so the gift is tax-free for the recipient','Optionale Pauschalsteuer, damit das Geschenk für den Empfänger steuerfrei ist'),-E.flat,'sub']);
+  if(E.adhoc&&E.income) r.push([L('If the brand doesn’t confirm: result after income tax','Falls die Brand nicht bestätigt: Ergebnis nach Ertragsteuern'),E.afterNo,'sub']);
+  return r;
+}
+function rows(R){
+  const a=S.a, E=R.econ, out=[], blank=['','',''];
+  out.push([L('Sample tax check','Sample-Steuercheck'),L('Created ','Erstellt ')+today(),'']); out.push(blank);
+  out.push([L('Documentation','Dokumentation'),'','']);
+  docFields().forEach(([k,l])=>out.push([l,S.doc[k]||(k==='date'?today():''),'']));
+  out.push(blank); out.push([L('Answers','Antworten'),'','']);
+  Q.filter(q=>vis(q)&&S.a[q.id]!==undefined).forEach(q=>out.push([qText(q),labelOf(q),'']));
+  out.push(blank); out.push([L('Result','Ergebnis'),'','']);
+  out.push([L('Invoice / credit note with the brand','Rechnung / Gutschrift mit der Brand'),strip(R.v.brand),'']);
+  out.push([recLabel(a),strip(R.v.rec),'']);
+  out.push([L('Create a 1 EUR invoice?','1-EUR-Rechnung erstellen?'),L('No','Nein'),'']);
+  R.alerts.forEach(x=>out.push([L('Note','Hinweis'),strip(x.h)+': '+strip(x.b),'']));
+  R.blocks.forEach(X=>{ out.push(blank); out.push([strip(X.title),'','']);
+    (X.facts||[]).forEach(f=>out.push([strip(f[0]),strip(f[1]),'']));
+    if(X.note) out.push([L('Invoice text','Rechnungstext'),strip(X.note),'']);
+    if(X.euro) out.push([L('1 EUR invoice?','1-EUR-Rechnung?'),strip(X.euro),'']);
+    if(X.legal&&X.legal.length) out.push([L('Legal basis','Rechtsgrundlagen'),X.legal.map(strip).join('; '),'']); });
+  out.push(blank); out.push([L('Economics – PGG view','Wirtschaftlichkeit – PGG-Sicht')+' ('+CUR+')','','']);
+  econRows(R).forEach(r=>out.push([strip(r[0]),typeof r[1]==='number'?Math.round(r[1]*100)/100:r[1],'']));
+  out.push([L('Brand','Brand'),strip(E.brand),'']); out.push([a.rtype==='ic'?L('Receiving company','Empfangende Gesellschaft'):L('Recipient','Empfänger'),strip(E.rec),'']);
+  out.push(blank); out.push([L('To-do','To-do'),'',L('Done (date / initials)','Erledigt (Datum / Kürzel)')]);
+  let n=1; todoGroups(R).forEach(g=>g.items.forEach(it=>out.push([`${n++}. ${strip(g.h)}`,strip(it),''])));
+  return out;
+}
+const tsv=R=>rows(R).map(r=>r.map(c=>typeof c==='number'?fmt(c):String(c).replace(/[\t\n]+/g,' ')).join('\t')).join('\n');
+async function downloadXlsx(R,el){
+  if(!DL||typeof XLSX==='undefined'){ el.textContent=L('Excel download isn’t available here – use Copy instead.','Excel-Download ist hier nicht verfügbar – bitte Kopieren nutzen.'); return; }
+  const ws=XLSX.utils.aoa_to_sheet(rows(R)); ws['!cols']=[{wch:48},{wch:100},{wch:24}];
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,L('Sample check','Sample-Check'));
+  const buf=XLSX.write(wb,{type:'array',bookType:'xlsx'});
+  const who=(S.doc.rec||'sample').replace(/[^A-Za-z0-9ÄÖÜäöüß_-]+/g,'-').slice(0,40);
+  try{ await DL.save({filename:`Sample-check_${(S.doc.date||today())}_${who}.xlsx`,data:new Blob([buf])}); el.textContent=L('Saved','Gespeichert'); }
+  catch(e){ el.textContent=(e&&e.code==='declined')?'':L('Download failed – use Copy instead.','Download fehlgeschlagen – bitte Kopieren nutzen.'); }
+}
+function renderResult(){
+  bar.style.width='100%';
+  const a=S.a;
+  if(a.entity==='other'){
+    app.innerHTML=`<div class="alert warn"><b>${L('Not covered','Nicht abgedeckt')}</b>${L('This check covers German and UK PGG companies. For Jimm’s, PCCG, CK Iberia, CK Hungary and PGW, please contact Group Finance.','Der Check deckt deutsche und UK-Gesellschaften der PGG ab. Für Jimm’s, PCCG, CK Iberia, CK Hungary und PGW bitte Group Finance kontaktieren.')}</div>
+      <div class="nav"><button class="btn ghost" id="back">${L('Back','Zurück')}</button><button class="btn" id="restart">${L('Start over','Neu starten')}</button></div>`;
+    document.getElementById('back').onclick=goBack; document.getElementById('restart').onclick=restart; return;
+  }
+  const R=compute(a), E=R.econ;
+  let h=`<div class="verdicts">
+    <div class="vt"><small>${L('Invoice / credit note with the brand','Rechnung / Gutschrift mit der Brand')}</small><b>${R.v.brand}</b></div>
+    <div class="vt"><small>${recLabel(a)}</small><b>${R.v.rec}</b></div>
+    <div class="vt gold"><small>${L('Create a 1 EUR invoice?','1-EUR-Rechnung erstellen?')}</small><b>${L('No','Nein')}</b></div></div>`;
+  R.alerts.forEach(x=>h+=`<div class="alert ${x.t}"><b>${x.h}</b>${x.b}</div>`);
+  R.blocks.forEach(X=>{
+    h+=`<section class="block"><h3>${X.title}</h3><div class="facts">${(X.facts||[]).map(f=>`<span class="fact"><i>${f[0]}:</i> ${f[1]}</span>`).join('')}</div>
+      ${X.note?`<div class="inv"><small>${L('Invoice text','Rechnungstext')}</small>${X.note}</div>`:''}
+      ${X.euro?`<div class="euro">${L('1 EUR invoice?','1-EUR-Rechnung?')} ${X.euro}</div>`:''}
+      ${X.legal&&X.legal.length?`<details><summary>${L('Legal basis','Rechtsgrundlagen')}</summary><ul>${X.legal.map(l=>`<li>${l}</li>`).join('')}</ul></details>`:''}</section>`;
+  });
+  h+=`<section class="block"><h3>${L('Economics','Wirtschaftlichkeit')}</h3><div class="tbl-wrap"><table class="econ">`+
+    econRows(R).map(r=>`<tr class="${r[2]||''}"><td>${r[0]}</td><td>${typeof r[1]==='number'?fmt(r[1]):r[1]}</td></tr>`).join('')+
+    `</table></div><div class="cols"><div class="party"><b>${L('Brand','Brand')}</b>${E.brand}</div><div class="party"><b>${a.rtype==='ic'?L('Receiving company','Empfangende Gesellschaft'):L('Recipient','Empfänger')}</b>${E.rec}</div></div></section>`;
+  if(R.tpl.length){
+    h+=`<section class="block"><h3>${L('Templates','Vorlagen')}</h3><p class="help">${L('Business documents in English – copy and adjust.','Geschäftsdokumente auf Englisch – kopieren und anpassen.')}</p>`;
+    R.tpl.forEach((x,i)=>h+=`<div class="tpl"><div class="tpl-h"><b>${x.title}</b><button class="btn ghost small" data-tpl="${i}">${L('Copy','Kopieren')}</button></div><pre>${esc(x.text)}</pre></div>`);
+    h+=`</section>`;
+  }
+  h+=`<section class="block"><h3>${L('Documentation','Dokumentation')}</h3><p class="help">${L('Optional – these details go into the Excel file and the copied summary.','Optional – diese Angaben landen in der Excel-Datei und in der kopierten Zusammenfassung.')}</p><div class="docgrid">`+
+    docFields().map(([k,l])=>`<label><span>${l}</span><input data-doc="${k}" value="${esc(S.doc[k]||(k==='date'?today():''))}"></label>`).join('')+
+    `</div><div class="nav">${DL?`<button class="btn" id="xlsx">${L('Download Excel','Excel herunterladen')}</button>`:''}<button class="btn ${DL?'ghost':''}" id="copy">${L('Copy for Excel','Für Excel kopieren')}</button><span class="copied" id="copied" role="status"></span></div></section>`;
+  let n=1;
+  h+=`<section class="final"><h3>${L('Your to-do list','Deine To-dos')}</h3>`+todoGroups(R).map(g=>`<div class="tg${g.stop?' stop':''}"><p class="tgh">${g.h}</p><ul>`+g.items.map(it=>`<li><label><input type="checkbox"><span class="n">${n++}</span><span>${it}</span></label></li>`).join('')+`</ul></div>`).join('')+`</section>`;
+  h+=`<section class="block"><details><summary>${L('Your answers','Deine Antworten')}</summary><ul class="answers">${Q.filter(q=>vis(q)&&S.a[q.id]!==undefined).map(q=>`<li><span>${qText(q)}</span><span>${labelOf(q)}</span></li>`).join('')}</ul></details></section>`;
+  h+=`<div class="nav"><button class="btn ghost" id="back">${L('Back','Zurück')}</button><button class="btn ghost" id="restart">${L('Start over','Neu starten')}</button></div>
+  <p class="foot">${L('Covers German and UK PGG companies. Not a replacement for tax advice – if in doubt, ask Group Finance.','Deckt deutsche und UK-Gesellschaften der PGG ab. Ersetzt keine Steuerberatung – im Zweifel Group Finance fragen.')}</p>`;
+  app.innerHTML=h;
+  document.getElementById('back').onclick=goBack; document.getElementById('restart').onclick=restart;
+  const msg=document.getElementById('copied');
+  app.querySelectorAll('[data-doc]').forEach(i=>i.oninput=()=>{ S.doc[i.dataset.doc]=i.value; });
+  document.getElementById('copy').onclick=()=>copyText(tsv(R),msg);
+  const xb=document.getElementById('xlsx'); if(xb) xb.onclick=()=>downloadXlsx(R,msg);
+  app.querySelectorAll('[data-tpl]').forEach(b=>b.onclick=()=>copyText(R.tpl[+b.dataset.tpl].text,msg));
+}
+function copyText(text,el){
+  const done=()=>{ el.textContent=L('Copied','Kopiert'); setTimeout(()=>el.textContent='',2000); };
+  const fb=()=>{ const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(e){ el.textContent=L('Copy failed','Kopieren fehlgeschlagen'); } document.body.removeChild(ta); };
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done,fb); else fb(); }catch(e){ fb(); }
+}
+render();
+})();
+</script>
+</body>
+</html>
